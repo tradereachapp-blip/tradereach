@@ -1,12 +1,23 @@
+import Image from 'next/image'
+
 export default function ThankYouPage() {
   const supportPhone = process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? ''
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-      {/* Minimal nav */}
-      <nav className="border-b border-white/10 px-4 py-4">
+      {/* Nav with logo */}
+      <nav className="border-b border-white/10 px-4 py-3">
         <div className="max-w-5xl mx-auto">
-          <span className="text-gray-400 text-sm font-medium">Free Home Service Quotes</span>
+          <a href="/">
+            <Image
+              src="/logo.png"
+              alt="TradeReach Home Service Leads"
+              width={140}
+              height={79}
+              className="h-9 w-auto"
+              priority
+            />
+          </a>
         </div>
       </nav>
 
@@ -59,9 +70,15 @@ export default function ThankYouPage() {
         </div>
       </div>
 
-      {/* Footer — brand only here */}
-      <footer className="border-t border-white/8 py-4 px-4 text-center">
-        <p className="text-gray-700 text-xs">Powered by TradeReach</p>
+      {/* Footer */}
+      <footer className="border-t border-white/8 py-6 px-4 text-center">
+        <Image
+          src="/logo.png"
+          alt="TradeReach"
+          width={100}
+          height={56}
+          className="h-7 w-auto mx-auto opacity-40"
+        />
       </footer>
     </div>
   )
