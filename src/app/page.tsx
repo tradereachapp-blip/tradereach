@@ -53,7 +53,7 @@ export default function HomePage() {
       {/* ── HERO ── */}
       <section className="pt-16 pb-8 px-4" id="get-quote">
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
+          <div className="grid md:grid-cols-2 gap-12 items-start">
 
             {/* Left */}
             <div className="pt-2">
@@ -99,7 +99,7 @@ export default function HomePage() {
             </div>
 
             {/* Right: Form */}
-            <div className="lg:sticky lg:top-24">
+            <div className="md:sticky md:top-24">
               <LeadCaptureForm />
             </div>
           </div>
