@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -55,16 +54,11 @@ export default function DashboardNav({ contractor, userEmail }: Props) {
     <nav className="bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/dashboard" className="flex items-center">
-            <Image
-              src="/logo.png"
-              alt="TradeReach"
-              width={130}
-              height={73}
-              className="h-9 w-auto"
-              priority
-            />
+          {/* Wordmark */}
+          <Link href="/dashboard" className="flex items-center select-none">
+            <span className="text-lg font-black tracking-tight">
+              <span className="text-gray-900">Trade</span><span className="text-orange-500">Reach</span>
+            </span>
           </Link>
 
           {/* Desktop nav */}

@@ -1,22 +1,15 @@
-import Image from 'next/image'
-
 export default function ThankYouPage() {
   const supportPhone = process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? ''
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-      {/* Nav with logo */}
+      {/* Nav with wordmark */}
       <nav className="border-b border-white/10 px-4 py-3">
         <div className="max-w-5xl mx-auto">
-          <a href="/">
-            <Image
-              src="/logo.png"
-              alt="TradeReach Home Service Leads"
-              width={140}
-              height={79}
-              className="h-9 w-auto"
-              priority
-            />
+          <a href="/" className="select-none">
+            <span className="text-xl font-black tracking-tight">
+              <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
+            </span>
           </a>
         </div>
       </nav>
@@ -72,13 +65,9 @@ export default function ThankYouPage() {
 
       {/* Footer */}
       <footer className="border-t border-white/8 py-6 px-4 text-center">
-        <Image
-          src="/logo.png"
-          alt="TradeReach"
-          width={100}
-          height={56}
-          className="h-7 w-auto mx-auto opacity-40"
-        />
+        <span className="text-base font-black tracking-tight opacity-40 select-none">
+          <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
+        </span>
       </footer>
     </div>
   )

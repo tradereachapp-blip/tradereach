@@ -1,19 +1,12 @@
-import Image from 'next/image'
-
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       <nav className="bg-gray-900 border-b border-gray-800 px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image
-              src="/logo.png"
-              alt="TradeReach"
-              width={110}
-              height={62}
-              className="h-8 w-auto"
-              priority
-            />
+            <span className="text-lg font-black tracking-tight select-none">
+              <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
+            </span>
             <span className="text-gray-500 text-sm font-medium border-l border-gray-700 pl-3">Admin</span>
           </div>
           <nav className="flex gap-4 text-sm">

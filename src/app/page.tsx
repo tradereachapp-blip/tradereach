@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import LeadCaptureForm from '@/components/forms/LeadCaptureForm'
 
 export const metadata = {
@@ -29,15 +28,10 @@ export default function HomePage() {
       {/* ── NAV ── */}
       <nav className="border-b border-white/10 px-4 py-3 sticky top-0 z-50 bg-gray-950/95 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <a href="/" className="flex items-center">
-            <Image
-              src="/logo.png"
-              alt="TradeReach"
-              width={160}
-              height={87}
-              className="h-9 w-auto"
-              priority
-            />
+          <a href="/" className="flex items-center select-none">
+            <span className="text-xl font-black tracking-tight">
+              <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
+            </span>
           </a>
           <div className="flex items-center gap-4">
             <a href="/contractors" className="text-gray-400 hover:text-white text-sm font-medium transition-colors hidden sm:block">
@@ -276,7 +270,9 @@ export default function HomePage() {
       {/* ── FOOTER ── */}
       <footer className="border-t border-white/8 py-10 px-4">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <Image src="/logo.png" alt="TradeReach" width={130} height={71} className="h-9 w-auto opacity-70" />
+          <span className="text-lg font-black tracking-tight opacity-60">
+            <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
+          </span>
           <div className="flex flex-wrap justify-center gap-6 text-gray-500 text-xs">
             <a href="/contractors" className="hover:text-gray-300 transition-colors">For Contractors</a>
             <a href="/login" className="hover:text-gray-300 transition-colors">Contractor Login</a>
