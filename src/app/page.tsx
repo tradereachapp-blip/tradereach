@@ -1,4 +1,5 @@
 import LeadCaptureForm from '@/components/forms/LeadCaptureForm'
+import ServiceQuizPopup from '@/components/ServiceQuizPopup'
 
 export const metadata = {
   title: 'Get a Free Quote From a Licensed Local Contractor | TradeReach',
@@ -28,8 +29,19 @@ export default function HomePage() {
       {/* ── NAV ── */}
       <nav className="border-b border-white/10 px-4 py-3 sticky top-0 z-50 bg-gray-950/95 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <a href="/" className="flex items-center select-none">
-            <span className="text-xl font-black tracking-tight">
+          <a href="/" className="flex items-center select-none group">
+            <img
+              src="/images/logo-badge.png"
+              alt="TradeReach — Home Service Leads"
+              className="h-10 sm:h-11 w-auto object-contain transition-opacity group-hover:opacity-90"
+              onError={(e) => {
+                const t = e.currentTarget
+                t.style.display = 'none'
+                if (t.nextElementSibling) (t.nextElementSibling as HTMLElement).style.display = 'flex'
+              }}
+            />
+            {/* Fallback wordmark if logo fails to load */}
+            <span className="hidden items-center text-xl font-black tracking-tight">
               <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
             </span>
           </a>
@@ -37,7 +49,7 @@ export default function HomePage() {
             <a href="/contractors" className="text-gray-400 hover:text-white text-sm font-medium transition-colors hidden sm:block">
               Are you a contractor? →
             </a>
-            <a href="#get-quote" className="cta-pulse bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-all shadow-lg shadow-orange-500/20">
+            <a href="#get-quote" data-quiz-trigger="true" className="cta-pulse bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-all shadow-lg shadow-orange-500/20">
               Get Free Quote
             </a>
           </div>
@@ -212,7 +224,7 @@ export default function HomePage() {
           </div>
 
           <div className="text-center mt-10">
-            <a href="#get-quote" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/25 text-sm">
+            <a href="#get-quote" data-quiz-trigger="true" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/25 text-sm">
               Get My Free Quote Now →
             </a>
           </div>
@@ -300,25 +312,82 @@ export default function HomePage() {
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-black mb-4">Ready to Get Your Free Quote?</h2>
           <p className="text-gray-400 mb-8">Takes 30 seconds. No account. No spam. A contractor will call you within 2 hours.</p>
-          <a href="#get-quote" className="inline-flex items-center gap-2 cta-pulse bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-5 rounded-xl transition-all shadow-xl shadow-orange-500/30 text-base">
+          <a href="#get-quote" data-quiz-trigger="true" className="inline-flex items-center gap-2 cta-pulse bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-5 rounded-xl transition-all shadow-xl shadow-orange-500/30 text-base">
             Get My Free Quote →
           </a>
         </div>
       </section>
 
+      {/* ── LEGAL POLICY ── */}
+      <section className="border-t border-white/5 bg-gray-950 px-4 py-10">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-orange-500 text-xs font-bold uppercase tracking-widest mb-4">Legal & Disclosures</p>
+
+          <div className="space-y-4 text-gray-600 text-[11px] leading-relaxed">
+
+            <div>
+              <p className="text-gray-500 font-semibold mb-1">Telephone Consumer Protection Act (TCPA) Consent</p>
+              <p>By submitting your information through this website, you expressly authorize TradeReach and its network of licensed home service contractors to contact you at the phone number and email address you provide, including via live calls, pre-recorded or artificial voice messages, text messages (SMS/MMS), and automated dialing systems, for the purpose of providing free quotes and home service information. This consent is not required as a condition of any purchase. Message and data rates may apply. Reply STOP to any text to opt out at any time. You may also opt out by contacting us at <a href="mailto:support@tradereachapp.com" className="text-gray-500 underline hover:text-gray-400">support@tradereachapp.com</a>.</p>
+            </div>
+
+            <div>
+              <p className="text-gray-500 font-semibold mb-1">Lead Generation Disclosure</p>
+              <p>TradeReach is a lead generation and marketing platform, not a licensed contractor, home improvement company, or home services provider. We connect homeowners with independent, third-party home service contractors who operate independently of TradeReach. TradeReach does not perform any home service work and is not a party to any agreement between a homeowner and a contractor. Contractors pay a fee to receive homeowner leads through our platform. This fee does not influence which contractors are displayed or connected with homeowners, and does not affect the pricing or quality of services offered by contractors.</p>
+            </div>
+
+            <div>
+              <p className="text-gray-500 font-semibold mb-1">Contractor Verification Disclaimer</p>
+              <p>While TradeReach makes reasonable efforts to verify that contractors in its network hold valid licenses and insurance in their respective jurisdictions, TradeReach does not guarantee, warrant, or represent the accuracy, completeness, or current status of any contractor's licensing, insurance, bonding, certifications, or background information. Homeowners are strongly encouraged to independently verify a contractor's credentials, license status, insurance coverage, and references before engaging any contractor for home service work. TradeReach disclaims all responsibility for the acts or omissions of any contractor.</p>
+            </div>
+
+            <div>
+              <p className="text-gray-500 font-semibold mb-1">Privacy & Data Use</p>
+              <p>TradeReach collects your name, phone number, email address, ZIP code, and service request information solely for the purpose of connecting you with qualified local contractors. We do not sell your personally identifiable information to data brokers or marketing list companies. Your information may be shared with contractors in our network to fulfill your service request, and with third-party service providers who assist us in operating our platform. For full details, please review our Privacy Policy. By using this website, you acknowledge and agree to our data practices as described.</p>
+            </div>
+
+            <div>
+              <p className="text-gray-500 font-semibold mb-1">No Warranties; Limitation of Liability</p>
+              <p>TradeReach provides its services on an "as-is" and "as-available" basis without any warranty of any kind, express or implied. TradeReach does not guarantee contractor availability, response times, pricing, or the quality of any work performed. To the fullest extent permitted by applicable law, TradeReach shall not be liable for any direct, indirect, incidental, consequential, or punitive damages arising from your use of this website or your interactions with any contractor. Your use of this platform is at your own risk.</p>
+            </div>
+
+            <div>
+              <p className="text-gray-500 font-semibold mb-1">State-Specific Notices</p>
+              <p>Some states may have specific regulations regarding lead generation, contractor referrals, or telemarketing. California residents: Under the California Consumer Privacy Act (CCPA), you have the right to request access to, deletion of, and information about the personal data we collect. To exercise these rights, contact us at <a href="mailto:support@tradereachapp.com" className="text-gray-500 underline hover:text-gray-400">support@tradereachapp.com</a>. We do not sell personal information as defined under the CCPA.</p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* ── FOOTER ── */}
-      <footer className="border-t border-white/8 py-10 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <span className="text-lg font-black tracking-tight opacity-60">
-            <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
-          </span>
+      <footer className="border-t border-white/8 py-8 px-4 bg-gray-950">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
+          <a href="/" className="flex items-center select-none opacity-70 hover:opacity-100 transition-opacity">
+            <img
+              src="/images/logo-badge.png"
+              alt="TradeReach"
+              className="h-9 w-auto object-contain"
+              onError={(e) => {
+                const t = e.currentTarget
+                t.style.display = 'none'
+                if (t.nextElementSibling) (t.nextElementSibling as HTMLElement).style.display = 'inline'
+              }}
+            />
+            <span className="hidden text-base font-black tracking-tight">
+              <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
+            </span>
+          </a>
           <div className="flex flex-wrap justify-center gap-6 text-gray-500 text-xs">
             <a href="/contractors" className="hover:text-gray-300 transition-colors">For Contractors</a>
             <a href="/login" className="hover:text-gray-300 transition-colors">Contractor Login</a>
+            <a href="mailto:support@tradereachapp.com" className="hover:text-gray-300 transition-colors">Contact</a>
           </div>
-          <p className="text-gray-600 text-xs text-center">© {new Date().getFullYear()} TradeReach. All rights reserved.</p>
+          <p className="text-gray-600 text-xs text-center">© {new Date().getFullYear()} TradeReach LLC. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* ── SERVICE QUIZ POPUP ── */}
+      <ServiceQuizPopup />
 
     </div>
   )
