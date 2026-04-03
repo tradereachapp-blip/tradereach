@@ -99,7 +99,7 @@ export default function HomePage() {
             </div>
 
             {/* Right: Form */}
-            <div className="md:sticky md:top-24">
+            <div>
               <LeadCaptureForm />
             </div>
           </div>
