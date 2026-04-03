@@ -6,12 +6,12 @@ export const metadata = {
 }
 
 const SERVICES = [
-  { icon: '🏠', niche: 'Roofing', desc: 'Repairs, replacements, gutters & storm damage' },
-  { icon: '❄️', niche: 'HVAC', desc: 'AC, heating, furnaces & air quality systems' },
-  { icon: '🔧', niche: 'Plumbing', desc: 'Water heaters, pipes, drains & fixtures' },
-  { icon: '⚡', niche: 'Electrical', desc: 'Panel upgrades, wiring, outlets & EV chargers' },
-  { icon: '🪟', niche: 'Windows & Doors', desc: 'Installation, repair & energy upgrades' },
-  { icon: '🎨', niche: 'Painting', desc: 'Interior & exterior painting and finishing' },
+  { icon: '🏠', niche: 'Roofing', desc: 'Repairs, replacements, gutters & storm damage', img: '/images/iDUkX.jpg' },
+  { icon: '❄️', niche: 'HVAC', desc: 'AC, heating, furnaces & air quality systems', img: '/images/LXimw.jpg' },
+  { icon: '🔧', niche: 'Plumbing', desc: 'Water heaters, pipes, drains & fixtures', img: null },
+  { icon: '⚡', niche: 'Electrical', desc: 'Panel upgrades, wiring, outlets & EV chargers', img: null },
+  { icon: '🪟', niche: 'Windows & Doors', desc: 'Installation, repair & energy upgrades', img: null },
+  { icon: '🎨', niche: 'Painting', desc: 'Interior & exterior painting and finishing', img: null },
 ]
 
 const STATS = [
@@ -45,8 +45,25 @@ export default function HomePage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="pt-16 pb-8 px-4" id="get-quote">
-        <div className="max-w-6xl mx-auto">
+      <section
+        className="pt-16 pb-8 px-4 relative overflow-hidden"
+        id="get-quote"
+        style={{ backgroundImage: "url('/images/teUub.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}
+      >
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-gray-950/70 pointer-events-none" aria-hidden="true" />
+        {/* Animated orange glow lines */}
+        <div className="glow-line glow-line-1" aria-hidden="true" />
+        <div className="glow-line glow-line-2" aria-hidden="true" />
+        <div className="glow-line glow-line-3" aria-hidden="true" />
+        <div className="shooting-star-el shooting-star-1" aria-hidden="true" />
+        <div className="shooting-star-el shooting-star-2" aria-hidden="true" />
+        <div className="shooting-star-el shooting-star-3" aria-hidden="true" />
+        {/* Orange node dots */}
+        <div className="node-dot" style={{ top: '38%', left: '8%', animationDelay: '0s' }} aria-hidden="true" />
+        <div className="node-dot" style={{ top: '22%', left: '45%', animationDelay: '0.8s' }} aria-hidden="true" />
+        <div className="node-dot" style={{ top: '62%', left: '28%', animationDelay: '1.6s' }} aria-hidden="true" />
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-start">
 
             {/* Left */}
@@ -113,8 +130,19 @@ export default function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
+      <section
+        className="py-20 px-4 relative overflow-hidden"
+        style={{ backgroundImage: "url('/images/Y1t34.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}
+      >
+        <div className="absolute inset-0 bg-gray-950/80 pointer-events-none" aria-hidden="true" />
+        {/* Glow lines echoing the geometric pattern */}
+        <div className="glow-line glow-line-1" style={{ animationDelay: '1s', top: '30%' }} aria-hidden="true" />
+        <div className="glow-line glow-line-2" style={{ animationDelay: '3.5s', top: '70%' }} aria-hidden="true" />
+        <div className="shooting-star-el shooting-star-1" style={{ animationDelay: '2s' }} aria-hidden="true" />
+        <div className="node-dot" style={{ top: '25%', left: '15%', animationDelay: '0.3s' }} aria-hidden="true" />
+        <div className="node-dot" style={{ top: '65%', left: '75%', animationDelay: '1.2s' }} aria-hidden="true" />
+        <div className="node-dot" style={{ top: '45%', left: '55%', animationDelay: '2s' }} aria-hidden="true" />
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-14">
             <p className="text-orange-400 text-xs font-bold uppercase tracking-widest mb-3">Simple process</p>
             <h2 className="text-3xl md:text-4xl font-black mb-4">How TradeReach Works</h2>
@@ -164,10 +192,21 @@ export default function HomePage() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 stagger-children">
             {SERVICES.map((s) => (
-              <a key={s.niche} href="#get-quote" className="hover-lift group bg-white/3 border border-white/8 rounded-xl p-5 hover:border-orange-500/40 hover:bg-orange-500/5 transition-all cursor-pointer">
-                <div className="text-3xl mb-3">{s.icon}</div>
-                <h3 className="font-bold text-white text-sm mb-1 group-hover:text-orange-400 transition-colors">{s.niche}</h3>
-                <p className="text-gray-500 text-xs leading-relaxed">{s.desc}</p>
+              <a key={s.niche} href="#get-quote" className="hover-lift group bg-white/3 border border-white/8 rounded-xl overflow-hidden hover:border-orange-500/40 hover:bg-orange-500/5 transition-all cursor-pointer">
+                {s.img && (
+                  <div className="w-full h-36 overflow-hidden">
+                    <img
+                      src={s.img}
+                      alt={s.niche}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                )}
+                <div className="p-5">
+                  {!s.img && <div className="text-3xl mb-3">{s.icon}</div>}
+                  <h3 className="font-bold text-white text-sm mb-1 group-hover:text-orange-400 transition-colors">{s.niche}</h3>
+                  <p className="text-gray-500 text-xs leading-relaxed">{s.desc}</p>
+                </div>
               </a>
             ))}
           </div>
