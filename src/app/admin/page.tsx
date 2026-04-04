@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import SystemStatusPanel from '@/components/admin/SystemStatusPanel'
+import { PRICING } from '@/lib/pricing'
 
 export const revalidate = 0
 
@@ -30,7 +31,7 @@ export default async function AdminDashboard() {
   const proCount = subscribers?.filter(s => s.plan_type === 'pro').length ?? 0
   const eliteCount = subscribers?.filter(s => s.plan_type === 'elite').length ?? 0
   const pplRevenue = (pplClaims ?? []).reduce((sum, c) => sum + (c.amount_charged ?? 0), 0)
-  const mrr = proCount * 397 + eliteCount * 697
+  const mrr = proCount * PRICING.PRO_MONTHLY + eliteCount * PRICING.ELITE_MONTHLY
 
   const stats = [
     { label: 'Leads Today', value: leadsToday ?? 0, color: 'text-blue-400' },
