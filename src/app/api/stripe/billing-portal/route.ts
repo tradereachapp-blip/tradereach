@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       return structuredError('No billing account found', 404)
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tradereachapp.com'
     const session = await createBillingPortalSession(
       contractor.stripe_customer_id,
       `${appUrl}/settings`
