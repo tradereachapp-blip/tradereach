@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { logError, safeErrorMessage, structuredError } from '@/lib/utils/error-logger'
 import { PRO_MONTHLY_LEAD_CAP } from '@/lib/config'
+import { PRICING } from '@/lib/pricing'
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,8 +57,8 @@ export async function POST(request: NextRequest) {
           success: false,
           claim_type: 'overage',
           requires_payment: true,
-          amount: 25,
-          message: `You've used all ${PRO_MONTHLY_LEAD_CAP} included leads this month. Claim this lead for $25?`,
+          amount: PRICING.PRO_OVERAGE,
+          message: `You've used all ${PRO_MONTHLY_LEAD_CAP} included leads this month. Claim this lead for $${PRICING.PRO_OVERAGE}?`,
         })
       }
     }
@@ -110,19 +111,13 @@ async function claimLeadFree(
     amount_charged: 0,
   })
 
-  // Increment monthly count for Pro
+  // Increment monthly count for Pro — single direct read+write
   if (incrementCount) {
-    await admin.rpc('increment_leads_used', { contractor_id: contractorId })
-      .catch(() => null) // Fallback to direct update
-    await admin
+    const { data: c } = await admin
       .from('contractors')
-      .update({ leads_used_this_month: admin.rpc('increment', { x: 1 }) as any })
+      .select('leads_used_this_month')
       .eq('id', contractorId)
-      .then(() => null)
-      .catch(() => null)
-
-    // Simple direct increment
-    const { data: c } = await admin.from('contractors').select('leads_used_this_month').eq('id', contractorId).single()
+      .single()
     if (c) {
       await admin.from('contractors').update({
         leads_used_this_month: c.leads_used_this_month + 1,
