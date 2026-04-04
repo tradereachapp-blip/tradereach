@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { Lead, Contractor } from '@/types'
 import { PRO_MONTHLY_LEAD_CAP } from '@/lib/config'
+import { PRICING } from '@/lib/pricing'
 
 interface Props {
   lead: Lead
@@ -30,7 +31,7 @@ export default function ClaimLeadModal({ lead, contractor, onClose, onClaimed }:
   const isOverCap = contractor.plan_type === 'pro' && contractor.leads_used_this_month >= PRO_MONTHLY_LEAD_CAP
   const isPPL = contractor.plan_type === 'pay_per_lead'
   const requiresPayment = isOverCap || isPPL
-  const amount = isOverCap ? 25 : isPPL ? 45 : 0
+  const amount = isOverCap ? PRICING.PRO_OVERAGE : isPPL ? PRICING.PPL_PRICE : 0
 
   async function handleInitialClaim() {
     setLoading(true)
@@ -143,8 +144,8 @@ export default function ClaimLeadModal({ lead, contractor, onClose, onClaimed }:
                 <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4">
                   <p className="text-sm text-orange-800 font-medium">
                     {isOverCap
-                      ? `You've used all ${PRO_MONTHLY_LEAD_CAP} included leads this month. This lead will be charged at $25.`
-                      : `You'll be charged $45 for this lead. Full contact info is revealed after payment.`
+                      ? `You've used all ${PRO_MONTHLY_LEAD_CAP} included leads this month. This lead will be charged at $${PRICING.PRO_OVERAGE}.`
+                      : `You'll be charged $${PRICING.PPL_PRICE} for this lead. Full contact info is revealed after payment.`
                     }
                   </p>
                   <p className="text-2xl font-black text-orange-600 mt-1">${amount}</p>
