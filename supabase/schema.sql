@@ -30,6 +30,9 @@ create table if not exists public.contractors (
   leads_reset_at timestamptz,
   email_notifications boolean not null default true,
   sms_notifications boolean not null default true,
+  sms_notification_phone text,
+  promo_code text,
+  promo_expires_at timestamptz,
   onboarding_complete boolean not null default false
 );
 

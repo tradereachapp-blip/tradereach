@@ -39,7 +39,10 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (lookupErr || !contractor) {
-      return structuredError('Contractor profile not found. Complete setup first.', 404)
+      return Response.json({
+        success: false,
+        error: 'Please complete the previous steps before applying a coupon code.',
+      }, { status: 404 })
     }
 
     // Check if already using a promo

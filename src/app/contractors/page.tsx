@@ -128,7 +128,7 @@ export default function ContractorsPage() {
             <div className="bg-blue-900/25 border border-blue-500/40 rounded-2xl p-6">
               <h4 className="font-bold text-white text-xl mb-1">Pro</h4>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-4xl font-black text-white">$297</span>
+                <span className="text-4xl font-black text-white">$397</span>
                 <span className="text-gray-400 text-sm">/mo</span>
               </div>
               <p className="text-blue-400 text-xs mb-6">7-day free trial included</p>
@@ -153,7 +153,7 @@ export default function ContractorsPage() {
               </div>
               <h4 className="font-bold text-white text-xl mb-1 mt-2">Elite</h4>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-4xl font-black text-white">$597</span>
+                <span className="text-4xl font-black text-white">$697</span>
                 <span className="text-gray-400 text-sm">/mo</span>
               </div>
               <p className="text-orange-400 text-xs mb-6">7-day free trial included</p>
@@ -231,6 +231,7 @@ export default function ContractorsPage() {
           <LogoBadge className="h-11" footer />
           <div className="flex gap-6 text-gray-500 text-xs">
             <a href="/login" className="hover:text-gray-300 transition-colors">Contractor Login</a>
+            <a href="/refund-policy" className="hover:text-gray-300 transition-colors">Refund Policy</a>
             <a href="/signup" className="hover:text-gray-300 transition-colors">Sign Up</a>
             <a href="/" className="hover:text-gray-300 transition-colors">Homeowners</a>
           </div>

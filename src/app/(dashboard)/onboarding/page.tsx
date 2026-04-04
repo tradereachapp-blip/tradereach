@@ -27,20 +27,28 @@ function RexBanner({ step, fieldsDone }: { step: number; fieldsDone?: boolean })
   if (!msg) return null
   return (
     <div
-      className="flex items-start gap-3 bg-[#1a2744] border border-orange-500/30 rounded-2xl px-4 py-3.5 mb-6 transition-all duration-300"
+      className="transition-all duration-300 mb-6"
       style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(-8px)' }}
     >
-      <div
-        className="flex-shrink-0 w-10 h-10 rounded-full border-2 border-orange-500 overflow-hidden"
-        style={{ animation: 'rexFloatSm 3s ease-in-out infinite' }}
-      >
-        <img src="/images/rex-avatar.png" alt="Rex" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+      {/* Rex avatar — visible on all steps */}
+      <div className="flex justify-center mb-2">
+        <img
+          src="/images/rex-avatar.png"
+          alt="Rex"
+          style={{ height: 80, width: 'auto', objectFit: 'contain', animation: 'rexFloatSm 3s ease-in-out infinite' }}
+        />
       </div>
-      <div>
-        <div className="text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-0.5">Rex says</div>
-        <p className="text-sm text-gray-200 leading-snug">{msg}</p>
+      {/* Rex speech bubble */}
+      <div className="flex items-start gap-3 bg-[#1a2744] border border-orange-500/30 rounded-2xl px-4 py-3.5">
+        <div className="flex-shrink-0 w-8 h-8 rounded-full border-2 border-orange-500 overflow-hidden">
+          <img src="/images/rex-avatar.png" alt="Rex" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+        </div>
+        <div>
+          <div className="text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-0.5">Rex says</div>
+          <p className="text-sm text-gray-200 leading-snug">{msg}</p>
+        </div>
       </div>
-      <style>{`@keyframes rexFloatSm{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}`}</style>
+      <style>{`@keyframes rexFloatSm{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}`}</style>
     </div>
   )
 }
@@ -643,7 +651,7 @@ export default function OnboardingPage() {
                       <p className="text-blue-400 text-xs font-medium">7-day free trial</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-2xl font-black text-white">$297</span>
+                      <span className="text-2xl font-black text-white">$397</span>
                       <span className="text-gray-500 text-sm">/mo</span>
                     </div>
                   </div>
@@ -669,7 +677,7 @@ export default function OnboardingPage() {
                       <p className="text-orange-300 text-xs font-medium">7-day free trial</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-2xl font-black text-white">$597</span>
+                      <span className="text-2xl font-black text-white">$697</span>
                       <span className="text-orange-300 text-sm">/mo</span>
                     </div>
                   </div>
@@ -719,6 +727,15 @@ export default function OnboardingPage() {
                   </div>
                 )}
               </div>
+
+              {/* Refund policy notice */}
+              <p className="mt-4 text-center text-xs text-gray-600 leading-relaxed">
+                All plans include a 7-day free trial. Subscriptions are non-refundable after trial period.{' '}
+                Invalid leads replaced within 48 hours.{' '}
+                <a href="/refund-policy" target="_blank" rel="noopener" className="hover:text-gray-500 underline underline-offset-2 transition-colors">
+                  Refund Policy
+                </a>
+              </p>
 
               {error && <p className="mt-3 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{error}</p>}
 

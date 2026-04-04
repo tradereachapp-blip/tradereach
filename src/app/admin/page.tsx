@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import SystemStatusPanel from '@/components/admin/SystemStatusPanel'
 
 export const revalidate = 0
 
@@ -29,7 +30,7 @@ export default async function AdminDashboard() {
   const proCount = subscribers?.filter(s => s.plan_type === 'pro').length ?? 0
   const eliteCount = subscribers?.filter(s => s.plan_type === 'elite').length ?? 0
   const pplRevenue = (pplClaims ?? []).reduce((sum, c) => sum + (c.amount_charged ?? 0), 0)
-  const mrr = proCount * 297 + eliteCount * 597
+  const mrr = proCount * 397 + eliteCount * 697
 
   const stats = [
     { label: 'Leads Today', value: leadsToday ?? 0, color: 'text-blue-400' },
@@ -46,6 +47,7 @@ export default async function AdminDashboard() {
     <div>
       <h1 className="text-3xl font-bold text-white mb-8">Admin Dashboard</h1>
 
+      {/* Business Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {stats.map((stat) => (
           <div key={stat.label} className="bg-gray-900 rounded-xl p-4 border border-gray-800">
@@ -55,7 +57,8 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Quick Links */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <a href="/admin/leads" className="bg-gray-900 rounded-xl p-6 border border-gray-800 hover:border-orange-500 transition-colors group">
           <div className="text-2xl mb-2">📋</div>
           <h3 className="font-bold text-white group-hover:text-orange-400 transition-colors">Manage Leads</h3>
@@ -72,6 +75,9 @@ export default async function AdminDashboard() {
           <p className="text-gray-400 text-sm">System errors and coverage gaps</p>
         </a>
       </div>
+
+      {/* System Status Dashboard — Client Component with Rex + live status */}
+      <SystemStatusPanel />
     </div>
   )
 }

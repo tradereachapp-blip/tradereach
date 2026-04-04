@@ -57,7 +57,7 @@ export const PLAN_CONFIG: Record<PlanType, {
   },
   pro: {
     label: 'Pro',
-    price: 297,
+    price: 397, // STRIPE DASHBOARD: update Pro price to $397/mo
     monthlyLeads: 30,
     maxZipCodes: 10,
     hasExclusiveTerritory: false,
@@ -69,7 +69,7 @@ export const PLAN_CONFIG: Record<PlanType, {
   },
   elite: {
     label: 'Elite',
-    price: 597,
+    price: 697, // STRIPE DASHBOARD: update Elite price to $697/mo
     monthlyLeads: 'unlimited',
     maxZipCodes: 'unlimited' as any,
     hasExclusiveTerritory: true,

@@ -58,7 +58,7 @@ export default function ContractorMarketingSection() {
             <div className="bg-blue-900/30 border border-blue-500/40 rounded-2xl p-6">
               <h4 className="font-bold text-white text-lg mb-1">Pro</h4>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-black text-white">$297</span>
+                <span className="text-3xl font-black text-white">$397</span>
                 <span className="text-gray-400">/month</span>
               </div>
               <p className="text-blue-400 text-xs mb-4">7-day free trial</p>
@@ -82,7 +82,7 @@ export default function ContractorMarketingSection() {
               </div>
               <h4 className="font-bold text-white text-lg mb-1 mt-2">Elite</h4>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-black text-white">$597</span>
+                <span className="text-3xl font-black text-white">$697</span>
                 <span className="text-gray-400">/month</span>
               </div>
               <p className="text-orange-400 text-xs mb-4">7-day free trial</p>

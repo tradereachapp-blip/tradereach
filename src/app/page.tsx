@@ -329,6 +329,7 @@ export default function HomePage() {
           <div className="flex flex-wrap justify-center gap-6 text-gray-500 text-xs">
             <a href="/contractors" className="hover:text-gray-300 transition-colors">For Contractors</a>
             <a href="/login" className="hover:text-gray-300 transition-colors">Contractor Login</a>
+            <a href="/refund-policy" className="hover:text-gray-300 transition-colors">Refund Policy</a>
             <a href="mailto:support@tradereachapp.com" className="hover:text-gray-300 transition-colors">Contact</a>
           </div>
           <p className="text-gray-600 text-xs text-center">&copy; {new Date().getFullYear()} TradeReach LLC. All rights reserved.</p>

@@ -16,6 +16,7 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -27,7 +28,7 @@ export default function SignupPage() {
     }
 
     if (!isPasswordAcceptable(password)) {
-      setError('Password must be at least 8 characters and include an uppercase letter and a symbol.')
+      setError('Password must be at least 8 characters and include an uppercase letter, a number, and a symbol.')
       return
     }
 
@@ -176,6 +177,31 @@ export default function SignupPage() {
           )}
         </div>
 
+        {/* Terms & Refund Policy checkbox */}
+        <label className="flex items-start gap-3 cursor-pointer group">
+          <div className="relative flex-shrink-0 mt-0.5">
+            <input
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={e => setTermsAccepted(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-5 h-5 border-2 border-white/25 rounded peer-checked:bg-orange-500 peer-checked:border-orange-500 transition-all group-hover:border-white/40" />
+            {termsAccepted && (
+              <svg className="absolute inset-0 w-5 h-5 text-white p-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+          </div>
+          <span className="text-xs text-blue-200 leading-relaxed">
+            I agree to the TradeReach{' '}
+            <a href="/refund-policy" target="_blank" rel="noopener" className="text-orange-400 hover:underline">
+              Terms of Service and Refund Policy
+            </a>
+            . I understand that subscriptions are non-refundable after the 7-day free trial period.
+          </span>
+        </label>
+
         {error && (
           <div className="bg-red-500/20 border border-red-400/30 rounded-lg p-3 text-red-200 text-sm">
             {error}
@@ -184,7 +210,7 @@ export default function SignupPage() {
 
         <button
           type="submit"
-          disabled={loading || !isPasswordAcceptable(password) || password !== confirm}
+          disabled={loading || !isPasswordAcceptable(password) || password !== confirm || !termsAccepted}
           className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200"
         >
           {loading ? 'Creating account...' : 'Create Account'}
