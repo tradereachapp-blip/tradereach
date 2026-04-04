@@ -8,6 +8,13 @@ import type { Niche } from '@/types'
 
 type Step = 1 | 2 | 3 | 4 | 5
 
+interface PromoState {
+  input: string
+  loading: boolean
+  error: string
+  success: string
+}
+
 export default function OnboardingPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
@@ -30,6 +37,46 @@ export default function OnboardingPage() {
 
   // Step 4 — plan selection
   const maxZips = selectedPlan === 'elite' ? Infinity : selectedPlan === 'pro' ? 10 : 5
+
+  // Promo code
+  const [showPromo, setShowPromo] = useState(false)
+  const [promo, setPromo] = useState<PromoState>({ input: '', loading: false, error: '', success: '' })
+
+  async function handlePromoRedeem() {
+    if (!promo.input.trim()) return
+    setPromo(p => ({ ...p, loading: true, error: '', success: '' }))
+
+    // Save contractor record first (need it in DB before redeeming)
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
+
+    const upsertData = {
+      user_id: user.id,
+      business_name: businessName,
+      contact_name: contactName,
+      phone,
+      license_number: licenseNumber || null,
+      niche: niche!,
+      zip_codes: zipCodes,
+      plan_type: 'none' as const,
+    }
+    await supabase.from('contractors').upsert(upsertData, { onConflict: 'user_id' })
+
+    const res = await fetch('/api/promo/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: promo.input.trim() }),
+    })
+    const data = await res.json()
+
+    if (data.success) {
+      setPromo(p => ({ ...p, loading: false, success: data.message }))
+      setTimeout(() => setStep(5), 1200)
+    } else {
+      setPromo(p => ({ ...p, loading: false, error: data.error || 'Invalid promo code.' }))
+    }
+  }
 
   function addZip() {
     const z = zipInput.trim()
@@ -404,6 +451,49 @@ export default function OnboardingPage() {
                     {loading ? 'Starting checkout...' : 'Start Free Trial'}
                   </button>
                 </div>
+              </div>
+
+              {/* Promo Code */}
+              <div className="mt-6 border-t border-white/10 pt-5">
+                {!showPromo ? (
+                  <button
+                    onClick={() => setShowPromo(true)}
+                    className="w-full text-center text-blue-400 hover:text-blue-300 text-sm transition-colors underline underline-offset-2"
+                  >
+                    Have a promo code?
+                  </button>
+                ) : (
+                  <div>
+                    <p className="text-blue-200 text-sm font-medium mb-3 text-center">Enter your promo code</p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={promo.input}
+                        onChange={(e) => setPromo(p => ({ ...p, input: e.target.value, error: '', success: '' }))}
+                        onKeyDown={(e) => e.key === 'Enter' && handlePromoRedeem()}
+                        placeholder="Your promo code"
+                        className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-orange-400 font-mono tracking-wide"
+                        disabled={promo.loading}
+                        autoFocus
+                      />
+                      <button
+                        onClick={handlePromoRedeem}
+                        disabled={promo.loading || !promo.input.trim()}
+                        className="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg transition-all disabled:opacity-50"
+                      >
+                        {promo.loading ? '...' : 'Apply'}
+                      </button>
+                    </div>
+                    {promo.error && (
+                      <p className="mt-2 text-red-300 text-sm text-center">{promo.error}</p>
+                    )}
+                    {promo.success && (
+                      <div className="mt-3 bg-green-500/20 border border-green-400/30 rounded-lg p-3 text-center">
+                        <p className="text-green-300 font-semibold text-sm">🎉 {promo.success}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

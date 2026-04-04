@@ -42,6 +42,8 @@ export interface Contractor {
   stripe_subscription_id: string | null
   leads_used_this_month: number
   leads_reset_at: string | null
+  promo_code: string | null
+  promo_expires_at: string | null
 }
 
 export interface LeadClaim {
