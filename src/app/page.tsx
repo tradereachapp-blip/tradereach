@@ -29,11 +29,11 @@ export default function HomePage() {
       {/* ── NAV ── */}
       <nav className="border-b border-white/10 px-4 py-3 sticky top-0 z-50 bg-gray-950/95 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <a href="/" className="flex items-center select-none group">
+          <a href="/" className="logo-badge-wrap flex items-center select-none">
             <img
               src="/images/logo-badge.png"
               alt="TradeReach — Home Service Leads"
-              className="h-10 sm:h-11 w-auto object-contain transition-opacity group-hover:opacity-90"
+              className="logo-badge-img h-11 sm:h-12 w-auto object-contain"
               onError={(e) => {
                 const t = e.currentTarget
                 t.style.display = 'none'
@@ -362,11 +362,11 @@ export default function HomePage() {
       {/* ── FOOTER ── */}
       <footer className="border-t border-white/8 py-8 px-4 bg-gray-950">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
-          <a href="/" className="flex items-center select-none opacity-70 hover:opacity-100 transition-opacity">
+          <a href="/" className="flex items-center select-none opacity-60 hover:opacity-100 transition-opacity duration-200">
             <img
               src="/images/logo-badge.png"
               alt="TradeReach"
-              className="h-9 w-auto object-contain"
+              className="logo-footer-img h-9 w-auto object-contain"
               onError={(e) => {
                 const t = e.currentTarget
                 t.style.display = 'none'
