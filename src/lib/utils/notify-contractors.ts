@@ -24,23 +24,22 @@ interface NotifyResult {
   contractorId: string | null
 }
 
-/** Fetch contractor's auth email from Supabase */
-async function getContractorEmail(contractorId: string): Promise<string | null> {
+/** Fetch contractor's notification email — uses notification_email if set, falls back to auth email */
+async function getContractorEmail(contractor: Contractor): Promise<string | null> {
+  // Use dedicated notification email if the contractor set one
+  if (contractor.notification_email?.trim()) {
+    return contractor.notification_email.trim()
+  }
+  // Fall back to their Supabase auth email
   const supabase = createAdminClient()
-  const { data } = await supabase
-    .from('contractors')
-    .select('user_id')
-    .eq('id', contractorId)
-    .single()
-  if (!data) return null
-  const { data: userData } = await supabase.auth.admin.getUserById(data.user_id)
-  return userData?.user?.email ?? null
+  const { data } = await supabase.auth.admin.getUserById(contractor.user_id)
+  return data?.user?.email ?? null
 }
 
 /** Send email + SMS to a single contractor about a lead */
 async function notifyOneContractor(contractor: Contractor, lead: Lead): Promise<void> {
   const supabase = createAdminClient()
-  const email = await getContractorEmail(contractor.id)
+  const email = await getContractorEmail(contractor)
 
   // Email
   if (contractor.email_notifications !== false && email) {
