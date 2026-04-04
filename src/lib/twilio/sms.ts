@@ -33,8 +33,23 @@ async function sendSMS(
     })
 
     return true
-  } catch (err) {
-    const message = safeErrorMessage(err)
+  } catch (err: unknown) {
+    // Extract Twilio-specific error code and message for precise diagnostics
+    const twilioCode = (err as { code?: number })?.code
+    const twilioStatus = (err as { status?: number })?.status
+    const baseMessage = safeErrorMessage(err)
+    let message = baseMessage
+
+    if (twilioCode === 21608) {
+      message = `Twilio error 21608 — Trial account restriction: recipient number is not verified. ` +
+        `Verify the number at twilio.com/user/account/phone-numbers/verified OR upgrade your Twilio account. Raw: ${baseMessage}`
+    } else if (twilioCode === 21211) {
+      message = `Twilio error 21211 — Invalid 'To' phone number. Raw: ${baseMessage}`
+    } else if (twilioCode === 20003) {
+      message = `Twilio error 20003 — Authentication failed. Check TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN. Raw: ${baseMessage}`
+    } else if (twilioCode) {
+      message = `Twilio error ${twilioCode} (HTTP ${twilioStatus ?? '?'}): ${baseMessage}`
+    }
 
     // Log failure — never crash the caller
     await supabase.from('notifications').insert({
@@ -47,6 +62,7 @@ async function sendSMS(
 
     await logError('sms_send_failed', message, {
       to,
+      twilio_error_code: twilioCode ?? null,
       contractor_id: contractorId,
       lead_id: leadId,
     })
