@@ -22,34 +22,46 @@ const STATS = [
   { value: '50+ states', label: 'Nationwide contractor network' },
 ]
 
+/* ── Logo component used in nav + footer ──────────────────────────────────── */
+function LogoBadge({ className = 'h-12', footer = false }: { className?: string; footer?: boolean }) {
+  return (
+    <a href="/" className={`logo-badge-wrap inline-flex items-center select-none ${footer ? 'opacity-70 hover:opacity-100 transition-opacity duration-200' : ''}`}>
+      <img
+        src="/images/logo-badge.png"
+        alt="TradeReach — Home Service Leads"
+        className={`logo-badge-img ${className} w-auto object-contain`}
+        onError={(e) => {
+          const t = e.currentTarget as HTMLImageElement
+          t.style.display = 'none'
+          const sib = t.nextElementSibling as HTMLElement | null
+          if (sib) sib.style.display = 'flex'
+        }}
+      />
+      {/* Fallback text wordmark */}
+      <span className="hidden items-center text-xl font-black tracking-tight">
+        <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
+      </span>
+    </a>
+  )
+}
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white">
 
       {/* ── NAV ── */}
-      <nav className="border-b border-white/10 px-4 py-3 sticky top-0 z-50 bg-gray-950/95 backdrop-blur-sm">
+      <nav className="border-b border-white/10 px-4 py-2 sticky top-0 z-50 bg-gray-950/95 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <a href="/" className="logo-badge-wrap flex items-center select-none">
-            <img
-              src="/images/logo-badge.png"
-              alt="TradeReach — Home Service Leads"
-              className="logo-badge-img h-11 sm:h-12 w-auto object-contain"
-              onError={(e) => {
-                const t = e.currentTarget
-                t.style.display = 'none'
-                if (t.nextElementSibling) (t.nextElementSibling as HTMLElement).style.display = 'flex'
-              }}
-            />
-            {/* Fallback wordmark if logo fails to load */}
-            <span className="hidden items-center text-xl font-black tracking-tight">
-              <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
-            </span>
-          </a>
+          <LogoBadge className="h-12 sm:h-14" />
           <div className="flex items-center gap-4">
             <a href="/contractors" className="text-gray-400 hover:text-white text-sm font-medium transition-colors hidden sm:block">
               Are you a contractor? →
             </a>
-            <a href="#get-quote" data-quiz-trigger="true" className="cta-pulse bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-all shadow-lg shadow-orange-500/20">
+            <a
+              href="#get-quote"
+              data-quiz-trigger="true"
+              className="cta-btn bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-all shadow-lg shadow-orange-500/20"
+            >
               Get Free Quote
             </a>
           </div>
@@ -62,16 +74,13 @@ export default function HomePage() {
         id="get-quote"
         style={{ backgroundImage: "url('/images/teUub.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
-        {/* Dark overlay */}
         <div className="absolute inset-0 bg-gray-950/70 pointer-events-none" aria-hidden="true" />
-        {/* Animated orange glow lines */}
         <div className="glow-line glow-line-1" aria-hidden="true" />
         <div className="glow-line glow-line-2" aria-hidden="true" />
         <div className="glow-line glow-line-3" aria-hidden="true" />
         <div className="shooting-star-el shooting-star-1" aria-hidden="true" />
         <div className="shooting-star-el shooting-star-2" aria-hidden="true" />
         <div className="shooting-star-el shooting-star-3" aria-hidden="true" />
-        {/* Orange node dots */}
         <div className="node-dot" style={{ top: '38%', left: '8%', animationDelay: '0s' }} aria-hidden="true" />
         <div className="node-dot" style={{ top: '22%', left: '45%', animationDelay: '0.8s' }} aria-hidden="true" />
         <div className="node-dot" style={{ top: '62%', left: '28%', animationDelay: '1.6s' }} aria-hidden="true" />
@@ -79,7 +88,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-start">
 
             {/* Left */}
-            <div className="pt-2">
+            <div className="pt-2 reveal-up">
               <div className="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/25 text-orange-400 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
                 <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-pulse"></span>
                 Contractors available in your area right now
@@ -96,19 +105,13 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-wrap gap-2 mb-8">
-                {[
-                  '✓ Licensed & Insured Contractors',
-                  '✓ No Fees. Ever.',
-                  '✓ Response in Under 2 Hours',
-                  '✓ No Spam Calls',
-                ].map((b) => (
-                  <span key={b} className="inline-flex items-center bg-white/5 border border-white/10 text-gray-300 text-xs font-medium px-3 py-1.5 rounded-full">
+                {['✓ Licensed & Insured Contractors', '✓ No Fees. Ever.', '✓ Response in Under 2 Hours', '✓ No Spam Calls'].map((b) => (
+                  <span key={b} className="trust-badge inline-flex items-center bg-white/5 border border-white/10 text-gray-300 text-xs font-medium px-3 py-1.5 rounded-full">
                     {b}
                   </span>
                 ))}
               </div>
 
-              {/* Stars / social proof */}
               <div className="flex items-center gap-3">
                 <div className="flex">
                   {[1,2,3,4,5].map(i => (
@@ -122,7 +125,7 @@ export default function HomePage() {
             </div>
 
             {/* Right: Form */}
-            <div>
+            <div className="reveal-up" style={{ animationDelay: '0.1s' }}>
               <LeadCaptureForm />
             </div>
           </div>
@@ -132,8 +135,8 @@ export default function HomePage() {
       {/* ── STATS BAR ── */}
       <section className="py-10 px-4 border-y border-white/8 bg-white/2 mt-8">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-          {STATS.map((s) => (
-            <div key={s.label} className="text-center">
+          {STATS.map((s, i) => (
+            <div key={s.label} className="text-center reveal-up" style={{ animationDelay: `${i * 0.07}s` }}>
               <div className="text-2xl md:text-3xl font-black text-orange-400 mb-1">{s.value}</div>
               <div className="text-gray-500 text-xs leading-snug">{s.label}</div>
             </div>
@@ -147,15 +150,14 @@ export default function HomePage() {
         style={{ backgroundImage: "url('/images/Y1t34.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
         <div className="absolute inset-0 bg-gray-950/80 pointer-events-none" aria-hidden="true" />
-        {/* Glow lines echoing the geometric pattern */}
         <div className="glow-line glow-line-1" style={{ animationDelay: '1s', top: '30%' }} aria-hidden="true" />
         <div className="glow-line glow-line-2" style={{ animationDelay: '3.5s', top: '70%' }} aria-hidden="true" />
         <div className="shooting-star-el shooting-star-1" style={{ animationDelay: '2s' }} aria-hidden="true" />
         <div className="node-dot" style={{ top: '25%', left: '15%', animationDelay: '0.3s' }} aria-hidden="true" />
         <div className="node-dot" style={{ top: '65%', left: '75%', animationDelay: '1.2s' }} aria-hidden="true" />
-        <div className="node-dot" style={{ top: '45%', left: '55%', animationDelay: '2s' }} aria-hidden="true" />
+
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-14">
+          <div className="text-center mb-14 reveal-up">
             <p className="text-orange-400 text-xs font-bold uppercase tracking-widest mb-3">Simple process</p>
             <h2 className="text-3xl md:text-4xl font-black mb-4">How TradeReach Works</h2>
             <p className="text-gray-400 max-w-lg mx-auto">We cut out the middleman. Your request goes directly to verified local contractors — no call centers, no runaround.</p>
@@ -163,26 +165,11 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              {
-                n: '01',
-                icon: '📋',
-                title: 'Tell Us What You Need',
-                desc: 'Fill out our 30-second form. Tell us your service type, ZIP code, and the best time to call. No account needed.',
-              },
-              {
-                n: '02',
-                icon: '🔔',
-                title: 'We Alert Nearby Contractors',
-                desc: 'Your request is instantly sent to licensed, vetted contractors in your area who specialize in exactly what you need.',
-              },
-              {
-                n: '03',
-                icon: '📞',
-                title: 'They Call You — Free',
-                desc: 'Expect a call within 2 hours with a free estimate. No obligation to hire. Compare quotes and choose who you want.',
-              },
-            ].map((s) => (
-              <div key={s.n} className="hover-lift relative bg-white/3 border border-white/8 rounded-2xl p-8 hover:border-orange-500/30 transition-all">
+              { n: '01', icon: '📋', title: 'Tell Us What You Need', desc: 'Fill out our 30-second form. Tell us your service type, ZIP code, and the best time to call. No account needed.' },
+              { n: '02', icon: '🔔', title: 'We Alert Nearby Contractors', desc: 'Your request is instantly sent to licensed, vetted contractors in your area who specialize in exactly what you need.' },
+              { n: '03', icon: '📞', title: 'They Call You — Free', desc: 'Expect a call within 2 hours with a free estimate. No obligation to hire. Compare quotes and choose who you want.' },
+            ].map((s, i) => (
+              <div key={s.n} className="premium-card reveal-up relative bg-white/3 border border-white/8 rounded-2xl p-8 hover:border-orange-500/30 transition-all" style={{ animationDelay: `${i * 0.1}s` }}>
                 <div className="text-4xl mb-5">{s.icon}</div>
                 <div className="absolute top-6 right-6 text-white/8 font-black text-5xl leading-none select-none">{s.n}</div>
                 <h3 className="text-lg font-bold text-white mb-3">{s.title}</h3>
@@ -196,7 +183,7 @@ export default function HomePage() {
       {/* ── SERVICES ── */}
       <section className="py-20 px-4 bg-white/2 border-y border-white/8">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-14 reveal-up">
             <p className="text-orange-400 text-xs font-bold uppercase tracking-widest mb-3">What we cover</p>
             <h2 className="text-3xl md:text-4xl font-black mb-4">Every Major Home Service</h2>
             <p className="text-gray-400 max-w-lg mx-auto">From emergency repairs to planned upgrades, we have verified contractors ready for any job.</p>
@@ -204,7 +191,12 @@ export default function HomePage() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 stagger-children">
             {SERVICES.map((s) => (
-              <a key={s.niche} href="#get-quote" className="hover-lift group bg-white/3 border border-white/8 rounded-xl overflow-hidden hover:border-orange-500/40 hover:bg-orange-500/5 transition-all cursor-pointer">
+              <a
+                key={s.niche}
+                href="#get-quote"
+                data-quiz-trigger="true"
+                className="premium-card group bg-white/3 border border-white/8 rounded-xl overflow-hidden hover:border-orange-500/40 hover:bg-orange-500/5 transition-all cursor-pointer"
+              >
                 {s.img && (
                   <div className="w-full h-36 overflow-hidden">
                     <img
@@ -223,8 +215,12 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="text-center mt-10">
-            <a href="#get-quote" data-quiz-trigger="true" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/25 text-sm">
+          <div className="text-center mt-10 reveal-up">
+            <a
+              href="#get-quote"
+              data-quiz-trigger="true"
+              className="cta-btn inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/25 text-sm"
+            >
               Get My Free Quote Now →
             </a>
           </div>
@@ -235,7 +231,7 @@ export default function HomePage() {
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
+            <div className="reveal-up">
               <p className="text-orange-400 text-xs font-bold uppercase tracking-widest mb-3">Why homeowners choose us</p>
               <h2 className="text-3xl md:text-4xl font-black mb-6">No More Chasing Contractors Who Never Show</h2>
               <p className="text-gray-300 leading-relaxed mb-8">
@@ -246,8 +242,8 @@ export default function HomePage() {
                   { icon: '🔍', title: 'Every contractor is verified', desc: 'We check licenses, insurance, and reviews before anyone gets access to your info.' },
                   { icon: '⚡', title: 'No sitting on hold', desc: 'Your request goes out instantly. Contractors come to you — not the other way around.' },
                   { icon: '💰', title: 'Free for homeowners — always', desc: 'Contractors pay to access leads. You never pay a cent to get quotes.' },
-                ].map((f) => (
-                  <div key={f.title} className="flex gap-4 items-start">
+                ].map((f, i) => (
+                  <div key={f.title} className="flex gap-4 items-start reveal-up" style={{ animationDelay: `${i * 0.1}s` }}>
                     <div className="w-10 h-10 rounded-xl bg-orange-500/15 border border-orange-500/25 flex items-center justify-center flex-shrink-0 text-lg">{f.icon}</div>
                     <div>
                       <p className="text-white font-semibold text-sm mb-0.5">{f.title}</p>
@@ -264,8 +260,8 @@ export default function HomePage() {
                 { name: 'Jennifer M.', location: 'Austin, TX', service: 'Roofing', quote: 'I filled out the form at 9am and had two contractors calling me by 10:30. Got my roof replaced for $800 less than what my neighbor paid.' },
                 { name: 'Mike D.', location: 'Phoenix, AZ', service: 'HVAC', quote: 'AC went out on a 105° day. TradeReach had a tech at my door same afternoon. Couldn\'t believe it.' },
                 { name: 'Sandra T.', location: 'Nashville, TN', service: 'Plumbing', quote: 'Finally a service that doesn\'t spam you. One call, one contractor, fixed same day.' },
-              ].map((t) => (
-                <div key={t.name} className="hover-lift bg-white/3 border border-white/8 rounded-2xl p-5">
+              ].map((t, i) => (
+                <div key={t.name} className="premium-card reveal-up bg-white/3 border border-white/8 rounded-2xl p-5" style={{ animationDelay: `${i * 0.1}s` }}>
                   <div className="flex mb-3">
                     {[1,2,3,4,5].map(i => (
                       <svg key={i} className="w-3.5 h-3.5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
@@ -273,7 +269,7 @@ export default function HomePage() {
                       </svg>
                     ))}
                   </div>
-                  <p className="text-gray-300 text-sm leading-relaxed mb-4">"{t.quote}"</p>
+                  <p className="text-gray-300 text-sm leading-relaxed mb-4">&ldquo;{t.quote}&rdquo;</p>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-white font-semibold text-xs">{t.name}</p>
@@ -290,14 +286,14 @@ export default function HomePage() {
 
       {/* ── FOR CONTRACTORS CTA ── */}
       <section className="py-16 px-4 bg-orange-500/8 border-y border-orange-500/20">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-4xl mx-auto text-center reveal-up">
           <p className="text-orange-400 text-xs font-bold uppercase tracking-widest mb-3">For home service professionals</p>
           <h2 className="text-3xl md:text-4xl font-black mb-4">Are You a Contractor?</h2>
           <p className="text-gray-300 max-w-xl mx-auto mb-8 leading-relaxed">
             Stop chasing cold leads. TradeReach delivers homeowners who are actively looking for exactly what you do — in your service area.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="/contractors" className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/25 text-sm">
+            <a href="/contractors" className="cta-btn inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/25 text-sm">
               View Contractor Plans →
             </a>
             <a href="/login" className="inline-flex items-center justify-center gap-2 bg-white/8 hover:bg-white/12 border border-white/15 text-white font-semibold px-8 py-4 rounded-xl transition-all text-sm">
@@ -309,10 +305,14 @@ export default function HomePage() {
 
       {/* ── BOTTOM CTA ── */}
       <section className="py-20 px-4 text-center">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto reveal-up">
           <h2 className="text-3xl md:text-4xl font-black mb-4">Ready to Get Your Free Quote?</h2>
           <p className="text-gray-400 mb-8">Takes 30 seconds. No account. No spam. A contractor will call you within 2 hours.</p>
-          <a href="#get-quote" data-quiz-trigger="true" className="inline-flex items-center gap-2 cta-pulse bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-5 rounded-xl transition-all shadow-xl shadow-orange-500/30 text-base">
+          <a
+            href="#get-quote"
+            data-quiz-trigger="true"
+            className="cta-btn inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-5 rounded-xl transition-all shadow-xl shadow-orange-500/30 text-base"
+          >
             Get My Free Quote →
           </a>
         </div>
@@ -321,40 +321,24 @@ export default function HomePage() {
       {/* ── LEGAL POLICY ── */}
       <section className="border-t border-white/5 bg-gray-950 px-4 py-10">
         <div className="max-w-5xl mx-auto">
-          <p className="text-orange-500 text-xs font-bold uppercase tracking-widest mb-4">Legal & Disclosures</p>
-
+          <p className="text-orange-500 text-xs font-bold uppercase tracking-widest mb-4">Legal &amp; Disclosures</p>
           <div className="space-y-4 text-gray-600 text-[11px] leading-relaxed">
-
             <div>
               <p className="text-gray-500 font-semibold mb-1">Telephone Consumer Protection Act (TCPA) Consent</p>
               <p>By submitting your information through this website, you expressly authorize TradeReach and its network of licensed home service contractors to contact you at the phone number and email address you provide, including via live calls, pre-recorded or artificial voice messages, text messages (SMS/MMS), and automated dialing systems, for the purpose of providing free quotes and home service information. This consent is not required as a condition of any purchase. Message and data rates may apply. Reply STOP to any text to opt out at any time. You may also opt out by contacting us at <a href="mailto:support@tradereachapp.com" className="text-gray-500 underline hover:text-gray-400">support@tradereachapp.com</a>.</p>
             </div>
-
             <div>
               <p className="text-gray-500 font-semibold mb-1">Lead Generation Disclosure</p>
-              <p>TradeReach is a lead generation and marketing platform, not a licensed contractor, home improvement company, or home services provider. We connect homeowners with independent, third-party home service contractors who operate independently of TradeReach. TradeReach does not perform any home service work and is not a party to any agreement between a homeowner and a contractor. Contractors pay a fee to receive homeowner leads through our platform. This fee does not influence which contractors are displayed or connected with homeowners, and does not affect the pricing or quality of services offered by contractors.</p>
+              <p>TradeReach is a lead generation and marketing platform, not a licensed contractor. We connect homeowners with independent, third-party contractors who operate independently of TradeReach. Contractors pay a fee to receive leads through our platform. This fee does not influence which contractors are displayed or connected with homeowners.</p>
             </div>
-
             <div>
               <p className="text-gray-500 font-semibold mb-1">Contractor Verification Disclaimer</p>
-              <p>While TradeReach makes reasonable efforts to verify that contractors in its network hold valid licenses and insurance in their respective jurisdictions, TradeReach does not guarantee, warrant, or represent the accuracy, completeness, or current status of any contractor's licensing, insurance, bonding, certifications, or background information. Homeowners are strongly encouraged to independently verify a contractor's credentials, license status, insurance coverage, and references before engaging any contractor for home service work. TradeReach disclaims all responsibility for the acts or omissions of any contractor.</p>
+              <p>While TradeReach makes reasonable efforts to verify contractor licenses and insurance, we do not guarantee the accuracy or current status of any contractor&apos;s credentials. Homeowners are strongly encouraged to independently verify credentials before engaging any contractor. TradeReach disclaims all responsibility for contractor acts or omissions.</p>
             </div>
-
             <div>
-              <p className="text-gray-500 font-semibold mb-1">Privacy & Data Use</p>
-              <p>TradeReach collects your name, phone number, email address, ZIP code, and service request information solely for the purpose of connecting you with qualified local contractors. We do not sell your personally identifiable information to data brokers or marketing list companies. Your information may be shared with contractors in our network to fulfill your service request, and with third-party service providers who assist us in operating our platform. For full details, please review our Privacy Policy. By using this website, you acknowledge and agree to our data practices as described.</p>
+              <p className="text-gray-500 font-semibold mb-1">Privacy &amp; Data Use</p>
+              <p>TradeReach collects your name, phone number, email address, ZIP code, and service request information solely for connecting you with qualified local contractors. We do not sell your personally identifiable information to data brokers. California residents have rights under CCPA — contact <a href="mailto:support@tradereachapp.com" className="text-gray-500 underline hover:text-gray-400">support@tradereachapp.com</a> to exercise them.</p>
             </div>
-
-            <div>
-              <p className="text-gray-500 font-semibold mb-1">No Warranties; Limitation of Liability</p>
-              <p>TradeReach provides its services on an "as-is" and "as-available" basis without any warranty of any kind, express or implied. TradeReach does not guarantee contractor availability, response times, pricing, or the quality of any work performed. To the fullest extent permitted by applicable law, TradeReach shall not be liable for any direct, indirect, incidental, consequential, or punitive damages arising from your use of this website or your interactions with any contractor. Your use of this platform is at your own risk.</p>
-            </div>
-
-            <div>
-              <p className="text-gray-500 font-semibold mb-1">State-Specific Notices</p>
-              <p>Some states may have specific regulations regarding lead generation, contractor referrals, or telemarketing. California residents: Under the California Consumer Privacy Act (CCPA), you have the right to request access to, deletion of, and information about the personal data we collect. To exercise these rights, contact us at <a href="mailto:support@tradereachapp.com" className="text-gray-500 underline hover:text-gray-400">support@tradereachapp.com</a>. We do not sell personal information as defined under the CCPA.</p>
-            </div>
-
           </div>
         </div>
       </section>
@@ -362,27 +346,13 @@ export default function HomePage() {
       {/* ── FOOTER ── */}
       <footer className="border-t border-white/8 py-8 px-4 bg-gray-950">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
-          <a href="/" className="flex items-center select-none opacity-60 hover:opacity-100 transition-opacity duration-200">
-            <img
-              src="/images/logo-badge.png"
-              alt="TradeReach"
-              className="logo-footer-img h-9 w-auto object-contain"
-              onError={(e) => {
-                const t = e.currentTarget
-                t.style.display = 'none'
-                if (t.nextElementSibling) (t.nextElementSibling as HTMLElement).style.display = 'inline'
-              }}
-            />
-            <span className="hidden text-base font-black tracking-tight">
-              <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
-            </span>
-          </a>
+          <LogoBadge className="h-11" footer />
           <div className="flex flex-wrap justify-center gap-6 text-gray-500 text-xs">
             <a href="/contractors" className="hover:text-gray-300 transition-colors">For Contractors</a>
             <a href="/login" className="hover:text-gray-300 transition-colors">Contractor Login</a>
             <a href="mailto:support@tradereachapp.com" className="hover:text-gray-300 transition-colors">Contact</a>
           </div>
-          <p className="text-gray-600 text-xs text-center">© {new Date().getFullYear()} TradeReach LLC. All rights reserved.</p>
+          <p className="text-gray-600 text-xs text-center">&copy; {new Date().getFullYear()} TradeReach LLC. All rights reserved.</p>
         </div>
       </footer>
 

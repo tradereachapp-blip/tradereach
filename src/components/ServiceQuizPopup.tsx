@@ -74,20 +74,14 @@ export default function ServiceQuizPopup() {
     const onExit = (e: MouseEvent) => { if (e.clientY <= 10) openQuiz() }
     document.addEventListener('mouseleave', onExit)
 
-    // CTA button trigger via data attribute
-    const onCTAClick = (e: MouseEvent) => {
-      const t = e.target as HTMLElement
-      if (t.closest('[data-quiz-trigger]')) {
-        e.preventDefault()
-        openQuiz()
-      }
-    }
-    document.addEventListener('click', onCTAClick)
+    // Custom event from layout script (handles data-quiz-trigger clicks)
+    const onOpenEvent = () => openQuiz()
+    document.addEventListener('open-quiz', onOpenEvent)
 
     return () => {
       clearTimeout(timer)
       document.removeEventListener('mouseleave', onExit)
-      document.removeEventListener('click', onCTAClick)
+      document.removeEventListener('open-quiz', onOpenEvent)
     }
   }, [openQuiz])
 
