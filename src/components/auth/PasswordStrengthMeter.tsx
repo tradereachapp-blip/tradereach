@@ -34,8 +34,8 @@ export function checkPassword(password: string): {
 
 export function isPasswordAcceptable(password: string): boolean {
   const { requirements } = checkPassword(password)
-  // Must have: 8+ chars, 1 uppercase, 1 symbol minimum
-  return requirements.minLength && requirements.hasUppercase && requirements.hasSymbol
+  // Must have: 8+ chars, 1 uppercase, 1 number, 1 symbol minimum
+  return requirements.minLength && requirements.hasUppercase && requirements.hasNumber && requirements.hasSymbol
 }
 
 const STRENGTH_CONFIG = {
