@@ -48,6 +48,7 @@ export interface Contractor {
   sms_notifications: boolean
   sms_notification_phone: string | null
   notification_email: string | null
+  onboarding_complete: boolean
 }
 
 export interface LeadClaim {
