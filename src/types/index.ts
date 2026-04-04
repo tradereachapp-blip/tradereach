@@ -47,6 +47,7 @@ export interface Contractor {
   email_notifications: boolean
   sms_notifications: boolean
   sms_notification_phone: string | null
+  notification_email: string | null
 }
 
 export interface LeadClaim {
