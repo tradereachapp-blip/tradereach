@@ -1,3 +1,5 @@
+import { PRICING } from '@/lib/pricing'
+
 export default function ContractorMarketingSection() {
   return (
     <section id="contractors" className="py-20 px-4 bg-gradient-to-b from-gray-950 to-blue-950">
@@ -58,13 +60,13 @@ export default function ContractorMarketingSection() {
             <div className="bg-blue-900/30 border border-blue-500/40 rounded-2xl p-6">
               <h4 className="font-bold text-white text-lg mb-1">Pro</h4>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-black text-white">$397</span>
+                <span className="text-3xl font-black text-white">{`$${PRICING.PRO_MONTHLY}`}</span>
                 <span className="text-gray-400">/month</span>
               </div>
               <p className="text-blue-400 text-xs mb-4">7-day free trial</p>
               <ul className="text-sm text-gray-300 space-y-2 mb-6">
-                <li className="flex gap-2"><span className="text-green-400">✓</span> 30 leads/month included</li>
-                <li className="flex gap-2"><span className="text-green-400">✓</span> $25/lead after cap</li>
+                <li className="flex gap-2"><span className="text-green-400">✓</span> {PRICING.PRO_LEAD_CAP} leads/month included</li>
+                <li className="flex gap-2"><span className="text-green-400">✓</span> ${PRICING.PRO_OVERAGE}/lead after cap</li>
                 <li className="flex gap-2"><span className="text-green-400">✓</span> Up to 10 ZIP codes</li>
                 <li className="flex gap-2"><span className="text-blue-400">✓</span> Shared territory</li>
               </ul>
@@ -82,7 +84,7 @@ export default function ContractorMarketingSection() {
               </div>
               <h4 className="font-bold text-white text-lg mb-1 mt-2">Elite</h4>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-black text-white">$697</span>
+                <span className="text-3xl font-black text-white">{`$${PRICING.ELITE_MONTHLY}`}</span>
                 <span className="text-gray-400">/month</span>
               </div>
               <p className="text-orange-400 text-xs mb-4">7-day free trial</p>
