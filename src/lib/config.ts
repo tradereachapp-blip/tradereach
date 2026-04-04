@@ -4,6 +4,7 @@
 // ============================================================
 
 import type { Niche, PlanType } from '@/types'
+import { PRICING } from '@/lib/pricing'
 
 export const NICHES: Niche[] = ['Roofing', 'HVAC', 'Plumbing']
 
@@ -45,7 +46,7 @@ export const PLAN_CONFIG: Record<PlanType, {
   },
   pay_per_lead: {
     label: 'Pay Per Lead',
-    price: 45,
+    price: PRICING.PPL_PRICE,
     monthlyLeads: 'unlimited',
     maxZipCodes: 5,
     hasExclusiveTerritory: false,
@@ -57,19 +58,19 @@ export const PLAN_CONFIG: Record<PlanType, {
   },
   pro: {
     label: 'Pro',
-    price: 397, // STRIPE DASHBOARD: update Pro price to $397/mo
-    monthlyLeads: 30,
+    price: PRICING.PRO_MONTHLY,
+    monthlyLeads: PRICING.PRO_LEAD_CAP,
     maxZipCodes: 10,
     hasExclusiveTerritory: false,
     hasPriorityDelivery: false,
     hasFreeTrial: true,
     trialDays: 7,
-    overagePrice: 25,
+    overagePrice: PRICING.PRO_OVERAGE,
     priceId: process.env.STRIPE_PRO_PRICE_ID ?? null,
   },
   elite: {
     label: 'Elite',
-    price: 697, // STRIPE DASHBOARD: update Elite price to $697/mo
+    price: PRICING.ELITE_MONTHLY,
     monthlyLeads: 'unlimited',
     maxZipCodes: 'unlimited' as any,
     hasExclusiveTerritory: true,
@@ -84,8 +85,8 @@ export const PLAN_CONFIG: Record<PlanType, {
 export const ELITE_PRIORITY_WINDOW_MINUTES = 15
 export const LEAD_EXPIRY_HOURS = 72
 export const DUPLICATE_LEAD_WINDOW_HOURS = 24
-export const PRO_MONTHLY_LEAD_CAP = 30
-export const PAY_PER_LEAD_PRICE_CENTS = 4500 // $45.00
-export const PRO_OVERAGE_PRICE_CENTS = 2500  // $25.00
+export const PRO_MONTHLY_LEAD_CAP = PRICING.PRO_LEAD_CAP
+export const PAY_PER_LEAD_PRICE_CENTS = PRICING.PPL_PRICE * 100   // $45.00 → 4500
+export const PRO_OVERAGE_PRICE_CENTS  = PRICING.PRO_OVERAGE * 100 // $30.00 → 3000
 
 export const CALLBACK_TIMES = ['Morning', 'Afternoon', 'Evening', 'Anytime'] as const
