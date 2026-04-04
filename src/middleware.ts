@@ -44,11 +44,11 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // ── Admin panel — header-only auth (query params leak in server logs & referrers) ──
-  if (pathname.startsWith(ADMIN_ROUTE) && !pathname.startsWith('/admin/login')) {
+  // ── Admin panel — cookie-based auth ─────────────────────────────────────────
+  if (pathname.startsWith(ADMIN_ROUTE) && !pathname.startsWith('/admin/login') && !pathname.startsWith('/api/admin/auth')) {
     const adminPassword = process.env.ADMIN_PASSWORD
-    const provided = request.headers.get('x-admin-key')
-    if (!provided || provided !== adminPassword) {
+    const session = request.cookies.get('admin_session')?.value
+    if (!adminPassword || session !== adminPassword) {
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
   }
