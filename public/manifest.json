@@ -1,0 +1,17 @@
+{
+  "name": "TradeReach — Contractor Dashboard",
+  "short_name": "TradeReach",
+  "description": "Home service lead generation for contractors",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#030712",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/images/logo-badge.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/images/logo-badge.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/images/logo-badge.png", "sizes": "any", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en-US"
+}

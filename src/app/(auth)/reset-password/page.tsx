@@ -55,7 +55,7 @@ export default function ResetPasswordPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 pr-11 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+              className="dark-input pr-11"
               placeholder="Min 8 chars, uppercase + symbol"
               autoComplete="new-password"
               maxLength={128}
@@ -92,10 +92,10 @@ export default function ResetPasswordPage() {
               required
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className={`w-full px-4 py-3 pr-11 rounded-lg bg-white/10 border text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-colors ${
+              className={`dark-input pr-11 ${
                 confirm.length > 0
-                  ? confirm === password ? 'border-green-500/50' : 'border-red-500/50'
-                  : 'border-white/20'
+                  ? confirm === password ? '!border-green-500/70' : '!border-red-500/70'
+                  : ''
               }`}
               placeholder="••••••••"
               autoComplete="new-password"

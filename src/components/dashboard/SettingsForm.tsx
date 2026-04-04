@@ -11,7 +11,7 @@ interface Props {
   userEmail: string
 }
 
-const darkInput = 'w-full px-4 py-3 rounded-xl bg-gray-800 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/40 transition-all'
+const darkInput = 'dark-input'
 const darkLabel = 'block text-sm font-medium text-gray-300 mb-1.5'
 
 function SectionCard({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) {
@@ -216,8 +216,8 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
           </div>
           <div>
             <label className={darkLabel}>Service Type</label>
-            <select value={niche} onChange={e => setNiche(e.target.value as Niche)} className={darkInput + ' bg-gray-800'}>
-              {NICHES.map(n => <option key={n} value={n} className="bg-gray-800">{n}</option>)}
+            <select value={niche} onChange={e => setNiche(e.target.value as Niche)} className={darkInput}>
+              {NICHES.map(n => <option key={n} value={n} style={{ backgroundColor: '#1a2744', color: '#fff' }}>{n}</option>)}
             </select>
           </div>
           <div className="flex items-center justify-between pt-2">

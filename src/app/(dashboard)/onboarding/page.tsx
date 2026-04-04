@@ -6,6 +6,45 @@ import { createClient } from '@/lib/supabase/client'
 import LogoBadge from '@/components/LogoBadge'
 import type { Niche } from '@/types'
 
+// ─── Rex speech bubble messages per step ────────────────────────────────────
+const REX_MESSAGES: Record<number, string> = {
+  1: "Hey there! I'm Rex 👋 I'm going to help you start getting leads in the next 5 minutes. Ready?",
+  2: "Start with your business name — this is what homeowners see when you call them.",
+  3: "What's your specialty? Pick the service you focus on most. You can always expand later.",
+  4: "Enter the ZIP codes where you work. We'll only send you leads from these exact areas. 📍",
+  5: "This is important — make sure SMS is on so you get instant alerts the moment a lead comes in. Speed wins. ⚡",
+  6: "Most contractors start with Pro. Still free for 7 days — no charge today. 🎉",
+  7: "You're officially live on TradeReach! The moment a homeowner in your area requests a quote — boom. You get a text and email instantly.",
+}
+
+// ─── Lightweight Rex onboarding banner ───────────────────────────────────────
+function RexBanner({ step, fieldsDone }: { step: number; fieldsDone?: boolean }) {
+  const [visible, setVisible] = useState(false)
+  useEffect(() => { setTimeout(() => setVisible(true), 100) }, [step])
+  const msg = fieldsDone && step === 2
+    ? "Perfect. Looking good! Hit Continue when you're ready. ✅"
+    : REX_MESSAGES[step] ?? ''
+  if (!msg) return null
+  return (
+    <div
+      className="flex items-start gap-3 bg-[#1a2744] border border-orange-500/30 rounded-2xl px-4 py-3.5 mb-6 transition-all duration-300"
+      style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(-8px)' }}
+    >
+      <div
+        className="flex-shrink-0 w-10 h-10 rounded-full border-2 border-orange-500 overflow-hidden"
+        style={{ animation: 'rexFloatSm 3s ease-in-out infinite' }}
+      >
+        <img src="/images/rex-avatar.png" alt="Rex" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+      </div>
+      <div>
+        <div className="text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-0.5">Rex says</div>
+        <p className="text-sm text-gray-200 leading-snug">{msg}</p>
+      </div>
+      <style>{`@keyframes rexFloatSm{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}`}</style>
+    </div>
+  )
+}
+
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 interface PromoState {
@@ -77,7 +116,7 @@ const NICHE_CARDS: { niche: Niche; icon: string; desc: string }[] = [
   { niche: 'Plumbing', icon: '🔧', desc: 'Pipes, drains, water heaters, and more' },
 ]
 
-const inp = 'w-full px-4 py-3.5 rounded-xl bg-white/8 border border-white/15 text-white placeholder-blue-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500/50 transition-all'
+const inp = 'dark-input'
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -278,34 +317,51 @@ export default function OnboardingPage() {
           {/* ── STEP 1: WELCOME ─────────────────────────────────────────── */}
           {step === 1 && (
             <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
-              <div className="mb-8">
-                <LogoBadge className="h-16" href="/" />
+              <div className="mb-6">
+                <LogoBadge className="h-12" href="/" />
               </div>
-              <div className="w-20 h-20 bg-orange-500/15 border border-orange-500/30 rounded-2xl flex items-center justify-center mb-6 text-4xl">
-                ⚡
+              {/* Rex — drops in from above with bounce */}
+              <div
+                className="mb-4"
+                style={{ animation: 'rexBounceIn 0.8s cubic-bezier(0.34,1.56,0.64,1) forwards, rexFloat 3s ease-in-out 0.9s infinite' }}
+              >
+                <div className="w-40 h-40 mx-auto">
+                  <img src="/images/rex-avatar.png" alt="Rex — TradeReach AI" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
+              {/* Rex speech bubble */}
+              <div
+                className="bg-[#1a2744] border border-orange-500/50 rounded-2xl px-5 py-3 mb-6 max-w-xs text-sm text-white relative"
+                style={{ animation: 'rexSpeechPop 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.6s both' }}
+              >
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#1a2744] border-l border-t border-orange-500/50 rotate-45" />
+                Hey there! I'm Rex 👋 I'll get you set up and receiving leads in the next 5 minutes.
+              </div>
+              <h1 className="text-4xl md:text-5xl font-black text-white mb-3 leading-tight">
                 Welcome to<br />
                 <span className="text-orange-400">TradeReach.</span>
               </h1>
-              <p className="text-gray-300 text-lg mb-2 max-w-sm">
-                You're minutes away from receiving warm leads in your area.
-              </p>
-              <p className="text-gray-500 text-sm mb-10">Let's get you set up in under 3 minutes.</p>
+              <p className="text-gray-400 text-base mb-8 max-w-sm">You're minutes away from receiving warm leads in your area.</p>
               <button
                 onClick={() => goToStep(2)}
                 className="bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-black px-10 py-4 rounded-2xl transition-all text-lg shadow-xl shadow-orange-500/25"
               >
-                Let's Get Started →
+                Let's Go, Rex! →
               </button>
-              <p className="text-gray-600 text-xs mt-6">No credit card required to start</p>
+              <p className="text-gray-600 text-xs mt-5">No credit card required to start</p>
+              <style>{`
+                @keyframes rexBounceIn{0%{transform:translateY(-80px) scale(.8);opacity:0}60%{transform:translateY(8px) scale(1.05);opacity:1}80%{transform:translateY(-4px) scale(.98)}100%{transform:translateY(0) scale(1);opacity:1}}
+                @keyframes rexFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+                @keyframes rexSpeechPop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+              `}</style>
             </div>
           )}
 
           {/* ── STEP 2: BUSINESS INFO ───────────────────────────────────── */}
           {step === 2 && (
             <div className="py-6">
-              <div className="text-center mb-8">
+              <RexBanner step={2} fieldsDone={!!(businessName && contactName && phone)} />
+              <div className="text-center mb-6">
                 <h2 className="text-3xl font-black text-white mb-2">Tell us about<br />your business.</h2>
                 <p className="text-gray-400 text-sm">This helps us match you with the right homeowners.</p>
               </div>
@@ -354,7 +410,8 @@ export default function OnboardingPage() {
           {/* ── STEP 3: SERVICE SELECTION ───────────────────────────────── */}
           {step === 3 && (
             <div className="py-6">
-              <div className="text-center mb-8">
+              <RexBanner step={3} />
+              <div className="text-center mb-6">
                 <h2 className="text-3xl font-black text-white mb-2">What do you specialize in?</h2>
                 <p className="text-gray-400 text-sm">Pick your primary service. You can add more later.</p>
               </div>
@@ -395,7 +452,8 @@ export default function OnboardingPage() {
           {/* ── STEP 4: SERVICE AREA ────────────────────────────────────── */}
           {step === 4 && (
             <div className="py-6">
-              <div className="text-center mb-8">
+              <RexBanner step={4} />
+              <div className="text-center mb-6">
                 <h2 className="text-3xl font-black text-white mb-2">Where do you work?</h2>
                 <p className="text-gray-400 text-sm">Enter the ZIP codes you service. We'll only send you leads from these areas.</p>
               </div>
@@ -457,7 +515,8 @@ export default function OnboardingPage() {
           {/* ── STEP 5: NOTIFICATIONS ───────────────────────────────────── */}
           {step === 5 && (
             <div className="py-6">
-              <div className="text-center mb-8">
+              <RexBanner step={5} />
+              <div className="text-center mb-6">
                 <h2 className="text-3xl font-black text-white mb-2">How should we reach you?</h2>
                 <p className="text-gray-400 text-sm">We'll alert you the moment a new lead matches your area.</p>
               </div>
@@ -546,6 +605,7 @@ export default function OnboardingPage() {
           {/* ── STEP 6: CHOOSE PLAN ─────────────────────────────────────── */}
           {step === 6 && (
             <div className="py-6">
+              <RexBanner step={6} />
               <div className="text-center mb-6">
                 <h2 className="text-3xl font-black text-white mb-2">Choose your plan.</h2>
                 <p className="text-gray-400 text-sm">Start free for 7 days. Cancel anytime.</p>
@@ -671,15 +731,23 @@ export default function OnboardingPage() {
           {/* ── STEP 7: YOU'RE ALL SET ──────────────────────────────────── */}
           {step === 7 && (
             <div className="flex flex-col items-center justify-center min-h-[70vh] text-center relative z-10">
-              {/* Animated checkmark */}
-              <div className="w-24 h-24 bg-green-500/15 border-2 border-green-500/40 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-green-500/10">
-                <svg className="w-12 h-12 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" className="animate-[dash_0.6s_ease-in-out_forwards]" />
-                </svg>
+              {/* Rex celebrating */}
+              <div
+                className="mb-2"
+                style={{ animation: 'rexCelebrate 2s ease-in-out forwards, rexFloat 3s ease-in-out 2.1s infinite' }}
+              >
+                <img src="/images/rex-avatar.png" alt="Rex celebrating" style={{ width: 120, height: 120, objectFit: 'contain' }} />
+              </div>
+              <style>{`@keyframes rexCelebrate{0%,100%{transform:translateY(0) rotate(0)}15%{transform:translateY(-24px) rotate(-5deg)}30%{transform:translateY(0) rotate(5deg)}45%{transform:translateY(-20px) rotate(-3deg)}60%{transform:translateY(0) rotate(3deg)}75%{transform:translateY(-12px)}}`}</style>
+
+              {/* Rex speech */}
+              <div className="bg-[#1a2744] border border-orange-500/40 rounded-2xl px-4 py-3 mb-5 max-w-xs text-sm text-white"
+                style={{ animation: 'rexSpeechPop 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.3s both' }}>
+                You're officially live! 🎉 First lead text incoming — stay close to your phone!
               </div>
 
               <h2 className="text-4xl font-black text-white mb-3">You're all set.</h2>
-              <p className="text-gray-300 text-base mb-8 max-w-sm">
+              <p className="text-gray-300 text-base mb-6 max-w-sm">
                 Your account is active. The moment a homeowner in your area submits a request, we'll text and email you instantly.
               </p>
 

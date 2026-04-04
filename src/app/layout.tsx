@@ -14,6 +14,18 @@ export const metadata: Metadata = {
     description: 'Stop chasing cold leads. Start closing warm ones.',
     type: 'website',
   },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'TradeReach',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'theme-color': '#030712',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -72,9 +72,7 @@ export default function LeadCaptureForm() {
   const supportPhone = process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? ''
 
   const inputClass = (field?: string) =>
-    `w-full px-4 py-3 rounded-xl border bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all ${
-      field && errors[field] ? 'border-red-400/60' : 'border-white/10 hover:border-white/20'
-    }`
+    `dark-input ${field && errors[field] ? '!border-red-400/70' : ''}`
 
   if (duplicate) {
     return (
@@ -186,15 +184,15 @@ export default function LeadCaptureForm() {
             <select
               value={form.niche}
               onChange={e => update('niche', e.target.value)}
-              className={`${inputClass('niche')} bg-gray-800`}
+              className={inputClass('niche')}
             >
-              <option value="" className="bg-gray-800">Select...</option>
-              <option value="Roofing" className="bg-gray-800">Roofing</option>
-              <option value="HVAC" className="bg-gray-800">HVAC</option>
-              <option value="Plumbing" className="bg-gray-800">Plumbing</option>
-              <option value="Electrical" className="bg-gray-800">Electrical</option>
-              <option value="Windows & Doors" className="bg-gray-800">Windows & Doors</option>
-              <option value="Painting" className="bg-gray-800">Painting</option>
+              <option value="" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Select...</option>
+              <option value="Roofing" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Roofing</option>
+              <option value="HVAC" style={{ backgroundColor: '#1a2744', color: '#fff' }}>HVAC</option>
+              <option value="Plumbing" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Plumbing</option>
+              <option value="Electrical" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Electrical</option>
+              <option value="Windows & Doors" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Windows & Doors</option>
+              <option value="Painting" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Painting</option>
             </select>
             {errors.niche && <p className="text-red-400 text-xs mt-1">{errors.niche}</p>}
           </div>
@@ -220,13 +218,13 @@ export default function LeadCaptureForm() {
           <select
             value={form.callback_time}
             onChange={e => update('callback_time', e.target.value)}
-            className={`${inputClass()} bg-gray-800`}
+            className={inputClass()}
           >
-            <option value="" className="bg-gray-800">Any time</option>
-            <option value="Morning" className="bg-gray-800">Morning (8am – 12pm)</option>
-            <option value="Afternoon" className="bg-gray-800">Afternoon (12pm – 5pm)</option>
-            <option value="Evening" className="bg-gray-800">Evening (5pm – 8pm)</option>
-            <option value="Anytime" className="bg-gray-800">Anytime</option>
+            <option value="" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Any time</option>
+            <option value="Morning" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Morning (8am – 12pm)</option>
+            <option value="Afternoon" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Afternoon (12pm – 5pm)</option>
+            <option value="Evening" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Evening (5pm – 8pm)</option>
+            <option value="Anytime" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Anytime</option>
           </select>
         </div>
 

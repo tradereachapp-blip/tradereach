@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import DashboardNav from '@/components/dashboard/DashboardNav'
+import ChatBot from '@/components/ChatBot'
+import { RexProvider } from '@/context/RexContext'
 
 export default async function DashboardLayout({
   children,
@@ -14,7 +16,6 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  // Get contractor data server-side
   const admin = createAdminClient()
   const { data: contractor } = await admin
     .from('contractors')
@@ -22,15 +23,21 @@ export default async function DashboardLayout({
     .eq('user_id', user.id)
     .single()
 
-  // Redirect to onboarding if incomplete (skip for onboarding page itself)
-  // This is handled by middleware but we double-check here
+  const contractorFirstName = contractor?.contact_name?.split(' ')[0] ?? null
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <DashboardNav contractor={contractor} userEmail={user.email ?? ''} />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
-    </div>
+    <RexProvider>
+      <div className="min-h-screen bg-gray-950 text-white">
+        <DashboardNav contractor={contractor} userEmail={user.email ?? ''} />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {children}
+        </main>
+        {/* Rex AI Support Chat — appears on every dashboard page */}
+        <ChatBot
+          contractorName={contractor?.contact_name ?? null}
+          contractorId={user.id}
+        />
+      </div>
+    </RexProvider>
   )
 }

@@ -76,9 +76,7 @@ export default function LandingLeadForm({ defaultNiche }: Props) {
   }
 
   const inp = (field?: string) =>
-    `w-full px-4 py-3.5 rounded-xl bg-gray-800/80 border text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/60 focus:border-orange-500/40 transition-all text-sm ${
-      field && errors[field] ? 'border-red-400/60' : 'border-white/10 hover:border-white/20'
-    }`
+    `dark-input ${field && errors[field] ? '!border-red-400/70' : ''}`
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3.5" noValidate>
@@ -134,13 +132,13 @@ export default function LandingLeadForm({ defaultNiche }: Props) {
       <select
         value={form.callback_time}
         onChange={e => update('callback_time', e.target.value)}
-        className={`${inp()} bg-gray-800/80`}
+        className={inp()}
       >
-        <option value="" className="bg-gray-900">Best time to call (optional)</option>
-        <option value="Morning" className="bg-gray-900">Morning (8am – 12pm)</option>
-        <option value="Afternoon" className="bg-gray-900">Afternoon (12pm – 5pm)</option>
-        <option value="Evening" className="bg-gray-900">Evening (5pm – 8pm)</option>
-        <option value="Anytime" className="bg-gray-900">Anytime</option>
+        <option value="" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Best time to call (optional)</option>
+        <option value="Morning" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Morning (8am – 12pm)</option>
+        <option value="Afternoon" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Afternoon (12pm – 5pm)</option>
+        <option value="Evening" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Evening (5pm – 8pm)</option>
+        <option value="Anytime" style={{ backgroundColor: '#1a2744', color: '#fff' }}>Anytime</option>
       </select>
 
       <div className="bg-white/4 border border-white/8 rounded-xl p-3.5">
