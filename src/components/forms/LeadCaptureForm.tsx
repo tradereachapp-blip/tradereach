@@ -72,8 +72,8 @@ export default function LeadCaptureForm() {
   const supportPhone = process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? ''
 
   const inputClass = (field?: string) =>
-    `w-full px-4 py-3 rounded-xl border bg-white/8 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all ${
-      field && errors[field] ? 'border-red-400' : 'border-white/15'
+    `w-full px-4 py-3 rounded-xl border bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all ${
+      field && errors[field] ? 'border-red-400/60' : 'border-white/10 hover:border-white/20'
     }`
 
   if (duplicate) {
@@ -104,7 +104,7 @@ export default function LeadCaptureForm() {
         </div>
         <h3 className="text-2xl font-bold text-white mb-3">Your request has been received.</h3>
         <p className="text-gray-300 mb-5 leading-relaxed">
-          A licensed <strong className="text-white">{form.niche}</strong> contractor in your area will call you within{' '}
+          A trusted local <strong className="text-white">{form.niche}</strong> contractor in your area will call you within{' '}
           <strong className="text-white">2 hours</strong> during business hours. No obligation to hire.
         </p>
         {supportPhone && (

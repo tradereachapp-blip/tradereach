@@ -34,7 +34,7 @@ export async function sendHomeownerConfirmation(lead: Lead): Promise<void> {
             <div style="padding: 32px;">
               <h2 style="color: #111827; font-size: 22px; margin: 0 0 16px;">Hi ${firstName},</h2>
               <p style="color: #374151; line-height: 1.7; font-size: 15px; margin: 0 0 16px;">
-                A licensed <strong>${lead.niche}</strong> contractor in your area will be in touch within
+                A trusted local <strong>${lead.niche}</strong> contractor in your area will be in touch within
                 <strong> 2 hours</strong>. They will call you from a local number.
                 No obligation to hire.
               </p>

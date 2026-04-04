@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { NICHES, NICHE_DESCRIPTIONS, NICHE_ICONS } from '@/lib/config'
+import LogoBadge from '@/components/LogoBadge'
 import type { Niche } from '@/types'
 
 type Step = 1 | 2 | 3 | 4 | 5
@@ -188,15 +189,7 @@ export default function OnboardingPage() {
       <div className="max-w-2xl mx-auto">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2">
-            <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-black text-lg">T</span>
-            </div>
-            <div className="text-left">
-              <div className="text-white font-bold text-xl">TradeReach</div>
-              <div className="text-blue-300 text-xs">Home Service Leads</div>
-            </div>
-          </div>
+          <LogoBadge className="h-14" />
         </div>
 
         {/* Progress */}

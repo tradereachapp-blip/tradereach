@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendAdminCronSummary } from '@/lib/resend/templates'
-import { processDeferredNotifications } from '@/lib/utils/notify-contractors'
+import { processExpiredNotificationWindows } from '@/lib/utils/notify-contractors'
 import { logError, safeErrorMessage } from '@/lib/utils/error-logger'
 import { LEAD_EXPIRY_HOURS } from '@/lib/config'
 
@@ -42,12 +42,12 @@ export async function GET(request: NextRequest) {
     await logError('cron_summary_failed', safeErrorMessage(err))
   }
 
-  // 3. Process deferred notifications (post-elite-priority-window)
+  // 3. Process expired notification windows — advance queue to next contractor
   try {
-    await processDeferredNotifications()
-    results.deferred_processed = true
+    const advanced = await processExpiredNotificationWindows()
+    results.notification_windows_advanced = advanced
   } catch (err) {
-    await logError('cron_deferred_failed', safeErrorMessage(err))
+    await logError('cron_notification_windows_failed', safeErrorMessage(err))
   }
 
   return Response.json({ success: true, results })

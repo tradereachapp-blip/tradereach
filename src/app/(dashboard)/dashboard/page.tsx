@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import AvailableLeadsTable from '@/components/dashboard/AvailableLeadsTable'
 import PlanStatusBanner from '@/components/dashboard/PlanStatusBanner'
+import LeadAlertSiren from '@/components/dashboard/LeadAlertSiren'
 import type { Contractor, Lead } from '@/types'
 import { ELITE_PRIORITY_WINDOW_MINUTES } from '@/lib/config'
 
@@ -20,12 +21,10 @@ export default async function DashboardPage() {
     redirect('/onboarding')
   }
 
-  // Check if subscription is still valid
   const isActive =
     contractor.plan_type === 'pay_per_lead' ||
     ['active', 'trialing'].includes(contractor.subscription_status)
 
-  // Fetch available leads matching contractor niche and zip codes
   let leads: Lead[] = []
   if (isActive && contractor.zip_codes.length > 0) {
     const now = new Date()
@@ -39,7 +38,6 @@ export default async function DashboardPage() {
       .in('zip', contractor.zip_codes)
       .order('created_at', { ascending: false })
 
-    // Non-Elite: hide leads still in priority window
     if (contractor.plan_type !== 'elite') {
       query = query.lt('created_at', eliteWindowStart.toISOString())
     }
@@ -50,32 +48,51 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Available Leads</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Leads matching your niche ({contractor.niche}) and service area
-        </p>
+      {/* Real-time lead alert siren */}
+      <LeadAlertSiren
+        contractorId={contractor.id}
+        niche={contractor.niche}
+        zipCodes={contractor.zip_codes}
+        isElite={contractor.plan_type === 'elite'}
+        initialLeadIds={leads.map(l => l.id)}
+      />
+
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-black text-white tracking-tight">Available Leads</h1>
+          <p className="text-gray-500 text-sm mt-0.5">
+            {contractor.niche} · {contractor.zip_codes.length} ZIP{contractor.zip_codes.length !== 1 ? 's' : ''} covered
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <span className="text-xs text-gray-500">Live</span>
+        </div>
       </div>
 
       <PlanStatusBanner contractor={contractor} />
 
       {!isActive ? (
-        <div className="card text-center py-12">
+        <div className="bg-gray-900 border border-white/8 rounded-2xl text-center py-16 px-6">
           <div className="text-4xl mb-4">⚠️</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Subscription Inactive</h3>
-          <p className="text-gray-500 mb-4">
+          <h3 className="text-lg font-bold text-white mb-2">Subscription Inactive</h3>
+          <p className="text-gray-500 mb-6 text-sm">
             Your subscription is {contractor.subscription_status}. Update your billing to receive leads.
           </p>
-          <a href="/settings" className="btn-primary">
-            Manage Subscription
+          <a href="/settings" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl transition-all text-sm">
+            Manage Subscription →
           </a>
         </div>
       ) : leads.length === 0 ? (
-        <div className="card text-center py-12">
-          <div className="text-4xl mb-4">📭</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No leads available right now</h3>
-          <p className="text-gray-500">
-            We'll notify you instantly via SMS and email when a new lead comes in.
+        <div className="bg-gray-900 border border-white/8 rounded-2xl text-center py-16 px-6">
+          <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-white/8">
+            <svg className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-white mb-2">No leads right now</h3>
+          <p className="text-gray-500 text-sm max-w-sm mx-auto">
+            You'll get an alert the moment a new lead comes in for your area. Keep this tab open.
           </p>
         </div>
       ) : (

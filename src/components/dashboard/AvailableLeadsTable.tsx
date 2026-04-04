@@ -43,10 +43,20 @@ function PriorityCountdown({ createdAt }: { createdAt: string }) {
   const s = secs % 60
 
   return (
-    <span className="text-xs bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-full animate-pulse">
-      ⚡ PRIORITY: {mins}:{s.toString().padStart(2, '0')}
+    <span className="inline-flex items-center gap-1 text-xs bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold px-2.5 py-1 rounded-full animate-pulse">
+      <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping inline-block" />
+      PRIORITY: {mins}:{s.toString().padStart(2, '0')}
     </span>
   )
+}
+
+const NICHE_ICONS: Record<string, string> = {
+  Roofing: '🏠',
+  HVAC: '❄️',
+  Plumbing: '🔧',
+  Electrical: '⚡',
+  'Windows & Doors': '🪟',
+  Painting: '🎨',
 }
 
 export default function AvailableLeadsTable({ leads, contractor }: Props) {
@@ -61,69 +71,77 @@ export default function AvailableLeadsTable({ leads, contractor }: Props) {
     setSelectedLead(null)
   }
 
-  const activeleads = leads.filter(l => !claimedIds.has(l.id))
+  const activeLeads = leads.filter(l => !claimedIds.has(l.id))
 
   return (
     <>
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Lead</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">ZIP</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Service</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Submitted</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">Best Time</th>
-                <th className="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {activeleads.map((lead) => {
-                const isPriorityWindow = isElite &&
-                  (Date.now() - new Date(lead.created_at).getTime()) < ELITE_PRIORITY_WINDOW_MINUTES * 60 * 1000
+      <div className="space-y-3">
+        {activeLeads.map((lead, idx) => {
+          const isPriorityWindow = isElite &&
+            (Date.now() - new Date(lead.created_at).getTime()) < ELITE_PRIORITY_WINDOW_MINUTES * 60 * 1000
 
-                return (
-                  <tr
-                    key={lead.id}
-                    className={`hover:bg-gray-50 transition-colors ${isPriorityWindow ? 'bg-purple-50/30' : ''}`}
-                  >
-                    <td className="px-4 py-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="font-medium text-gray-900">{lead.name.split(' ')[0]}</span>
-                        {isPriorityWindow && <PriorityCountdown createdAt={lead.created_at} />}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className="font-mono text-sm font-semibold text-gray-900">{lead.zip}</span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {lead.niche}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-500 hidden sm:table-cell">
-                      {timeSince(lead.created_at)}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-500 hidden md:table-cell">
-                      {lead.callback_time ?? 'Anytime'}
-                    </td>
-                    <td className="px-4 py-4">
-                      <button
-                        onClick={() => setSelectedLead(lead)}
-                        className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-orange-400"
-                      >
-                        {isOverCap ? 'Claim ($25)' :
-                         contractor.plan_type === 'pay_per_lead' ? 'Claim ($45)' :
-                         'Claim'}
-                      </button>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+          const claimLabel = isOverCap ? 'Claim ($25)' :
+            contractor.plan_type === 'pay_per_lead' ? 'Claim ($45)' : 'Claim Lead'
+
+          return (
+            <div
+              key={lead.id}
+              className={`relative rounded-xl border transition-all duration-200 overflow-hidden group
+                ${isPriorityWindow
+                  ? 'border-orange-500/40 bg-orange-500/5 shadow-lg shadow-orange-500/10'
+                  : 'border-white/8 bg-gray-900 hover:border-white/20 hover:bg-gray-800/50'
+                }`}
+              style={{ animationDelay: `${idx * 0.05}s` }}
+            >
+              {/* Priority stripe */}
+              {isPriorityWindow && (
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-500 to-orange-600 rounded-l-xl" />
+              )}
+
+              <div className="flex items-center gap-4 px-5 py-4 pl-6">
+                {/* Niche icon */}
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0
+                  ${isPriorityWindow ? 'bg-orange-500/20' : 'bg-white/5'}`}>
+                  {NICHE_ICONS[lead.niche] ?? '🏡'}
+                </div>
+
+                {/* Lead info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="font-bold text-white text-base">{lead.name.split(' ')[0]}  ·  {lead.zip}</span>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full
+                      ${isPriorityWindow
+                        ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                        : 'bg-blue-500/15 text-blue-400 border border-blue-500/20'
+                      }`}>
+                      {lead.niche}
+                    </span>
+                    {isPriorityWindow && <PriorityCountdown createdAt={lead.created_at} />}
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+                    <span>🕐 {timeSince(lead.created_at)}</span>
+                    {lead.callback_time && <span>📞 Prefers {lead.callback_time}</span>}
+                    {lead.description && (
+                      <span className="text-gray-400 truncate max-w-xs">"{lead.description}"</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Claim button */}
+                <button
+                  onClick={() => setSelectedLead(lead)}
+                  className={`flex-shrink-0 font-bold px-5 py-2.5 rounded-xl transition-all text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 shadow-lg
+                    ${isPriorityWindow
+                      ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/25'
+                      : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/15'
+                    }`}
+                >
+                  {claimLabel}
+                </button>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       {selectedLead && (

@@ -1,3 +1,5 @@
+import LogoBadge from '@/components/LogoBadge'
+
 export const metadata = {
   title: 'TradeReach — Home Service Leads for Contractors',
   description: 'Stop chasing cold leads. Start closing warm ones. TradeReach sends you homeowners who are ready for a quote.',
@@ -6,18 +8,10 @@ export const metadata = {
 export default function ContractorsPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      {/* Full TradeReach branded nav */}
-      <nav className="border-b border-white/10 px-4 py-4">
+      {/* Nav */}
+      <nav className="border-b border-white/10 px-4 py-2 sticky top-0 z-50 bg-gray-950/95 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <a href="/contractors" className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-black">T</span>
-            </div>
-            <div>
-              <div className="font-bold text-white leading-none">TradeReach</div>
-              <div className="text-blue-400 text-xs">Home Service Leads</div>
-            </div>
-          </a>
+          <LogoBadge className="h-12 sm:h-14" href="/contractors" />
           <div className="flex items-center gap-4">
             <a href="/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
               Login
@@ -231,20 +225,16 @@ export default function ContractorsPage() {
         </div>
       </section>
 
-      {/* Footer — full branded */}
+      {/* Footer */}
       <footer className="border-t border-white/8 py-8 px-4">
-        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4 text-sm text-gray-500">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-orange-500 rounded-md flex items-center justify-center">
-              <span className="text-white font-black text-xs">T</span>
-            </div>
-            <span className="font-medium text-gray-400">TradeReach Home Service Leads</span>
-          </div>
-          <div className="flex gap-5">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
+          <LogoBadge className="h-11" footer />
+          <div className="flex gap-6 text-gray-500 text-xs">
             <a href="/login" className="hover:text-gray-300 transition-colors">Contractor Login</a>
             <a href="/signup" className="hover:text-gray-300 transition-colors">Sign Up</a>
+            <a href="/" className="hover:text-gray-300 transition-colors">Homeowners</a>
           </div>
-          <p>© {new Date().getFullYear()} TradeReach. All rights reserved.</p>
+          <p className="text-gray-600 text-xs">© {new Date().getFullYear()} TradeReach LLC. All rights reserved.</p>
         </div>
       </footer>
     </div>

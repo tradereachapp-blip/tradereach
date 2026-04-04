@@ -1,16 +1,14 @@
+import LogoBadge from '@/components/LogoBadge'
+
 export default function ThankYouPage() {
   const supportPhone = process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? ''
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-      {/* Nav with wordmark */}
-      <nav className="border-b border-white/10 px-4 py-3">
+      {/* Nav */}
+      <nav className="border-b border-white/10 px-4 py-2">
         <div className="max-w-5xl mx-auto">
-          <a href="/" className="select-none">
-            <span className="text-xl font-black tracking-tight">
-              <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
-            </span>
-          </a>
+          <LogoBadge className="h-11" />
         </div>
       </nav>
 
@@ -25,7 +23,7 @@ export default function ThankYouPage() {
 
           <h1 className="text-3xl font-black mb-4">Your request has been received.</h1>
           <p className="text-gray-300 text-lg mb-6 leading-relaxed">
-            A licensed contractor in your area will call you within{' '}
+            A trusted local contractor will call you within{' '}
             <strong className="text-white">2 hours</strong> during business hours.
             They will call from a local number. No obligation to hire.
           </p>
@@ -64,10 +62,8 @@ export default function ThankYouPage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-white/8 py-6 px-4 text-center">
-        <span className="text-base font-black tracking-tight opacity-40 select-none">
-          <span className="text-white">Trade</span><span className="text-orange-500">Reach</span>
-        </span>
+      <footer className="border-t border-white/8 py-6 px-4 text-center flex justify-center">
+        <LogoBadge className="h-8" footer />
       </footer>
     </div>
   )

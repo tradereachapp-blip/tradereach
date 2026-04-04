@@ -80,11 +80,11 @@ export default function HomePage() {
               </h1>
 
               <p className="text-lg text-gray-300 mb-8 leading-relaxed max-w-lg">
-                Tell us what you need and a <strong className="text-white">licensed, verified contractor</strong> in your area calls you within 2 hours — with a free, no-obligation estimate.
+                Tell us what you need and a <strong className="text-white">trusted local contractor</strong> in your area calls you within 2 hours — with a free, no-obligation estimate.
               </p>
 
               <div className="flex flex-wrap gap-2 mb-8">
-                {['✓ Licensed & Insured Contractors', '✓ No Fees. Ever.', '✓ Response in Under 2 Hours', '✓ No Spam Calls'].map((b) => (
+                {['✓ Trusted Local Contractors', '✓ No Fees. Ever.', '✓ Response in Under 2 Hours', '✓ No Spam Calls'].map((b) => (
                   <span key={b} className="trust-badge inline-flex items-center bg-white/5 border border-white/10 text-gray-300 text-xs font-medium px-3 py-1.5 rounded-full">
                     {b}
                   </span>
@@ -218,7 +218,7 @@ export default function HomePage() {
               </p>
               <div className="space-y-4">
                 {[
-                  { icon: '🔍', title: 'Every contractor is verified', desc: 'We check licenses, insurance, and reviews before anyone gets access to your info.' },
+                  { icon: '🔍', title: 'Trusted, vetted pros', desc: 'We review every contractor in our network before they can access homeowner requests.' },
                   { icon: '⚡', title: 'No sitting on hold', desc: 'Your request goes out instantly. Contractors come to you — not the other way around.' },
                   { icon: '💰', title: 'Free for homeowners — always', desc: 'Contractors pay to access leads. You never pay a cent to get quotes.' },
                 ].map((f, i) => (

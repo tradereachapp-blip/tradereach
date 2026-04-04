@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import LogoBadge from '@/components/LogoBadge'
 import type { Contractor } from '@/types'
 
 interface Props {
@@ -24,20 +25,20 @@ export default function DashboardNav({ contractor, userEmail }: Props) {
 
   function planBadge() {
     if (!contractor) return null
-    const colors: Record<string, string> = {
-      elite: 'bg-purple-100 text-purple-800',
-      pro: 'bg-blue-100 text-blue-800',
-      pay_per_lead: 'bg-orange-100 text-orange-800',
-      none: 'bg-gray-100 text-gray-600',
+    const styles: Record<string, string> = {
+      elite: 'bg-orange-500/15 text-orange-400 border border-orange-500/30',
+      pro: 'bg-blue-500/15 text-blue-400 border border-blue-500/30',
+      pay_per_lead: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
+      none: 'bg-white/5 text-gray-500 border border-white/10',
     }
     const labels: Record<string, string> = {
-      elite: 'Elite',
-      pro: 'Pro',
+      elite: '⚡ Elite',
+      pro: '🔵 Pro',
       pay_per_lead: 'Pay Per Lead',
       none: 'No Plan',
     }
     return (
-      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${colors[contractor.plan_type]}`}>
+      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${styles[contractor.plan_type]}`}>
         {labels[contractor.plan_type]}
       </span>
     )
@@ -51,15 +52,11 @@ export default function DashboardNav({ contractor, userEmail }: Props) {
   ]
 
   return (
-    <nav className="bg-white border-b border-gray-200 shadow-sm">
+    <nav className="bg-gray-900 border-b border-white/8 shadow-lg shadow-black/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Wordmark */}
-          <Link href="/dashboard" className="flex items-center select-none">
-            <span className="text-lg font-black tracking-tight">
-              <span className="text-gray-900">Trade</span><span className="text-orange-500">Reach</span>
-            </span>
-          </Link>
+          {/* Logo */}
+          <LogoBadge className="h-9" href="/dashboard" />
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1">
@@ -67,10 +64,10 @@ export default function DashboardNav({ contractor, userEmail }: Props) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   pathname === link.href
-                    ? 'bg-orange-50 text-orange-600'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'bg-orange-500/15 text-orange-400 border border-orange-500/20'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {link.label}
@@ -81,10 +78,10 @@ export default function DashboardNav({ contractor, userEmail }: Props) {
           {/* Right side */}
           <div className="flex items-center gap-3">
             {planBadge()}
-            <div className="hidden md:block text-sm text-gray-500 max-w-32 truncate">{userEmail}</div>
+            <div className="hidden md:block text-xs text-gray-500 max-w-32 truncate">{userEmail}</div>
             <button
               onClick={handleSignOut}
-              className="text-sm text-gray-500 hover:text-red-600 transition-colors px-3 py-1.5 rounded-md hover:bg-red-50"
+              className="text-sm text-gray-500 hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10"
             >
               Sign Out
             </button>
@@ -92,7 +89,7 @@ export default function DashboardNav({ contractor, userEmail }: Props) {
             {/* Mobile menu */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-600"
+              className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -103,16 +100,16 @@ export default function DashboardNav({ contractor, userEmail }: Props) {
 
         {/* Mobile nav */}
         {menuOpen && (
-          <div className="md:hidden pb-3 space-y-1">
+          <div className="md:hidden pb-3 pt-1 space-y-1 border-t border-white/8 mt-1">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   pathname === link.href
-                    ? 'bg-orange-50 text-orange-600'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-orange-500/15 text-orange-400'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {link.label}

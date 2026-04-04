@@ -101,7 +101,7 @@ export async function sendHomeownerConfirmationSMS(
   lead: Lead
 ): Promise<void> {
   const body =
-    `Your quote request was received. A licensed contractor near you will call within 2 hours. Reply STOP to opt out.`
+    `Your quote request was received. A trusted local contractor will call you within 2 hours. Reply STOP to opt out.`
 
   await sendSMS(phone, body, undefined, lead.id)
 }
