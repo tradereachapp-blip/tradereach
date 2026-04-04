@@ -73,6 +73,8 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
   const [emailNotif, setEmailNotif] = useState(contractor.email_notifications ?? true)
   const [smsNotif, setSmsNotif] = useState(contractor.sms_notifications ?? true)
   const [smsNotifPhone, setSmsNotifPhone] = useState(contractor.sms_notification_phone ?? '')
+  const [notificationEmail, setNotificationEmail] = useState(contractor.notification_email ?? userEmail)
+  const [notifEmailError, setNotifEmailError] = useState('')
   const [smsPhoneError, setSmsPhoneError] = useState('')
   const [savingNotif, setSavingNotif] = useState(false)
   const [notifMsg, setNotifMsg] = useState('')
@@ -137,6 +139,12 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
       return
     }
     setSmsPhoneError('')
+    // Validate notification email if provided
+    if (notificationEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notificationEmail.trim())) {
+      setNotifEmailError('Please enter a valid email address.')
+      return
+    }
+    setNotifEmailError('')
     setSavingNotif(true)
     setNotifMsg('')
     const { error } = await supabase
@@ -145,6 +153,7 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
         email_notifications: emailNotif,
         sms_notifications: smsNotif,
         sms_notification_phone: smsNotifPhone.trim() || null,
+        notification_email: notificationEmail.trim() || null,
       })
       .eq('id', contractor.id)
     setNotifMsg(error ? `Error: ${error.message}` : '✓ Preferences saved')
@@ -309,8 +318,22 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
             </label>
           </div>
 
-          {/* SMS Notification Phone */}
+          {/* Notification Email Address */}
           <div className="border-t border-white/8 pt-5">
+            <label className={darkLabel}>Notification Email Address</label>
+            <p className="text-xs text-gray-500 mb-2">Lead alerts will be sent to this address. Add a different email if you want notifications sent elsewhere.</p>
+            <input
+              type="email"
+              value={notificationEmail}
+              onChange={e => { setNotificationEmail(e.target.value); setNotifEmailError('') }}
+              className={darkInput}
+              placeholder={userEmail}
+            />
+            {notifEmailError && <p className="text-red-400 text-xs mt-1.5">{notifEmailError}</p>}
+          </div>
+
+          {/* SMS Notification Phone */}
+          <div className="pt-4">
             <label className={darkLabel}>SMS Notification Number</label>
             <p className="text-xs text-gray-500 mb-2">This is the number that receives your instant lead alerts. Leave blank to use your primary business phone.</p>
             <input
@@ -318,7 +341,7 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
               value={smsNotifPhone}
               onChange={e => { setSmsNotifPhone(e.target.value); setSmsPhoneError('') }}
               className={darkInput}
-              placeholder="(555) 555-5555 — or leave blank to use business phone"
+              placeholder="(555) 555-5555 — leave blank to use business phone"
             />
             {smsPhoneError && <p className="text-red-400 text-xs mt-1.5">{smsPhoneError}</p>}
           </div>
