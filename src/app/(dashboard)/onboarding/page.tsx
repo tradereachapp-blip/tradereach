@@ -153,6 +153,17 @@ export default function OnboardingPage() {
   const [smsNotif, setSmsNotif] = useState(true)
   const [smsNotifPhone, setSmsNotifPhone] = useState('')
   const [smsPhoneError, setSmsPhoneError] = useState('')
+  const [notificationEmail, setNotificationEmail] = useState('')
+  const [notifEmailError, setNotifEmailError] = useState('')
+
+  // Pre-fill notification email from auth session
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email && !notificationEmail) setNotificationEmail(user.email)
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Plan / promo
   const [showPromo, setShowPromo] = useState(false)
@@ -209,6 +220,7 @@ export default function OnboardingPage() {
       email_notifications: emailNotif,
       sms_notifications: smsNotif,
       sms_notification_phone: smsNotifPhone.trim() || null,
+      notification_email: notificationEmail.trim() || null,
     }
     await supabase.from('contractors').upsert(upsertData, { onConflict: 'user_id' })
 
@@ -246,6 +258,7 @@ export default function OnboardingPage() {
       email_notifications: emailNotif,
       sms_notifications: smsNotif,
       sms_notification_phone: smsNotifPhone.trim() || null,
+      notification_email: notificationEmail.trim() || null,
     }
 
     const { error: upsertError } = await supabase
@@ -494,7 +507,7 @@ export default function OnboardingPage() {
                 <div className="flex flex-wrap gap-2 mb-5">
                   {zipCodes.map(z => (
                     <span key={z} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 border border-orange-500/25 text-orange-300 rounded-lg text-sm font-medium">
-                      �Ⓧ {z}
+                      📍 {z}
                       <button onClick={() => setZipCodes(zipCodes.filter(x => x !== z))} className="text-orange-400 hover:text-red-400 font-bold ml-0.5 transition-colors">×</button>
                     </span>
                   ))}
@@ -576,6 +589,20 @@ export default function OnboardingPage() {
 
               {/* Contact details */}
               <div className="space-y-3 border-t border-white/8 pt-4">
+                {emailNotif && (
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Notification Email Address</label>
+                    <p className="text-xs text-gray-500 mb-2">Lead alerts will be sent to this address. Add a different email if you want notifications sent elsewhere.</p>
+                    <input
+                      type="email"
+                      value={notificationEmail}
+                      onChange={e => { setNotificationEmail(e.target.value); setNotifEmailError('') }}
+                      className={inp}
+                      placeholder="you@example.com"
+                    />
+                    {notifEmailError && <p className="text-red-400 text-xs mt-1">{notifEmailError}</p>}
+                  </div>
+                )}
                 {smsNotif && (
                   <div>
                     <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">SMS Number <span className="text-gray-600 normal-case font-normal">(leave blank to use business phone)</span></label>
@@ -597,6 +624,10 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   onClick={() => {
+                    if (emailNotif && notificationEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notificationEmail.trim())) {
+                      setNotifEmailError('Please enter a valid email address.')
+                      return
+                    }
                     if (smsNotifPhone.trim() && !validateUSPhone(smsNotifPhone)) {
                       setSmsPhoneError('Please enter a valid US phone number.')
                       return
@@ -756,7 +787,7 @@ export default function OnboardingPage() {
               >
                 <img src="/images/rex-avatar.png" alt="Rex celebrating" style={{ width: 120, height: 120, objectFit: 'contain' }} />
               </div>
-              <style>{`@keyframes rexCelebrate{0%,100%{transform:translateY(0) rotate(0)}15%{transform:translateY(-24px) rotate(-5deg)}30%{transform:translateY(0) rotate(5deg)}45%{transform:translateY(-20px) rotate(-3deg)}60%{transform:translateY(0) rotate(3deg)}75%{transform:translateY(-12px)}}`}</style>
+              <style>{`@keyframes rexCelebrate{0%,100%{transform:translateY(0) rotate(0)}15){transform:translateY(-24px) rotate(-5deg)}30%{transform:translateY(0) rotate(5deg)}45%{transform:translateY(-20px) rotate(-3deg)}60%{transform:translateY(0) rotate(3deg)}75%{transform:translateY(-12px)}}`}</style>
 
               {/* Rex speech */}
               <div className="bg-[#1a2744] border border-orange-500/40 rounded-2xl px-4 py-3 mb-5 max-w-xs text-sm text-white"
