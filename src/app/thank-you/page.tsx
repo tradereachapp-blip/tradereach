@@ -42,7 +42,7 @@ export default function ThankYouPage() {
             <ul className="text-gray-300 text-sm space-y-3">
               <li className="flex gap-3 items-start">
                 <span className="text-green-400 font-bold mt-0.5">✓</span>
-                A verified contractor reviews your request
+                A trusted local contractor reviews your request
               </li>
               <li className="flex gap-3 items-start">
                 <span className="text-green-400 font-bold mt-0.5">✓</span>

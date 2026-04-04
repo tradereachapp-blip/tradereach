@@ -68,7 +68,9 @@ export async function sendLeadAlertSMS(
     `${firstName} needs a quote. ` +
     `Claim now: ${APP_URL}/dashboard`
 
-  await sendSMS(contractor.phone, body, contractor.id, lead.id)
+  // Use dedicated SMS notification number if set, otherwise fall back to business phone
+  const toPhone = contractor.sms_notification_phone || contractor.phone
+  await sendSMS(toPhone, body, contractor.id, lead.id)
 }
 
 // ----------------------------------------------------------------

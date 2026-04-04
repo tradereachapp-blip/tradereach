@@ -80,7 +80,7 @@ export default function ConversionPopup() {
 
           {/* Body copy */}
           <p className="text-gray-400 text-sm leading-relaxed mb-5">
-            Don't spend hours calling contractors who won't return your call. Tell us what you need — a licensed pro in your area will call <em className="text-gray-300 not-italic font-medium">you</em> with a free estimate.
+            Don't spend hours calling contractors who won't return your call. Tell us what you need — a trusted local pro in your area will call <em className="text-gray-300 not-italic font-medium">you</em> with a free estimate.
           </p>
 
           {/* Social proof row */}
@@ -108,7 +108,7 @@ export default function ConversionPopup() {
           <ul className="space-y-2 mb-6">
             {[
               '✓ 100% free — no credit card, no hidden fees',
-              '✓ Licensed & insured contractors only',
+              '✓ Trusted, vetted contractors',
               '✓ Response within 2 hours, guaranteed',
             ].map(item => (
               <li key={item} className="text-gray-300 text-xs flex items-center gap-2">

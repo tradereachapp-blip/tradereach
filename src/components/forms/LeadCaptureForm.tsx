@@ -82,7 +82,7 @@ export default function LeadCaptureForm() {
         <div className="text-4xl mb-4">👋</div>
         <h3 className="text-xl font-bold text-white mb-2">You're already in the queue</h3>
         <p className="text-gray-400">
-          It looks like you already submitted a request recently. A licensed contractor will be in touch within 2 hours during business hours.
+          It looks like you already submitted a request recently. A trusted local contractor will be in touch within 2 hours during business hours.
         </p>
         {supportPhone && (
           <p className="text-gray-500 text-sm mt-4">
@@ -115,7 +115,7 @@ export default function LeadCaptureForm() {
         )}
         <div className="bg-white/5 border border-white/8 rounded-xl p-4 text-left">
           <ul className="text-gray-300 text-sm space-y-2">
-            <li className="flex gap-2"><span className="text-green-400">✓</span> A verified contractor reviews your request</li>
+            <li className="flex gap-2"><span className="text-green-400">✓</span> A trusted local contractor reviews your request</li>
             <li className="flex gap-2"><span className="text-green-400">✓</span> They'll call at your preferred time with a free estimate</li>
             <li className="flex gap-2"><span className="text-green-400">✓</span> No obligation to hire — just get the information you need</li>
           </ul>

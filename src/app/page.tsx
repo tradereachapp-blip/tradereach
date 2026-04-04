@@ -3,8 +3,8 @@ import ServiceQuizPopup from '@/components/ServiceQuizPopup'
 import LogoBadge from '@/components/LogoBadge'
 
 export const metadata = {
-  title: 'Get a Free Quote From a Licensed Local Contractor | TradeReach',
-  description: 'Tell us what you need and a verified pro in your area will call you within 2 hours. No obligation. No spam.',
+  title: 'Get a Free Quote From a Trusted Local Contractor | TradeReach',
+  description: 'Tell us what you need and a trusted local pro in your area will call you within 2 hours. No obligation. No spam.',
 }
 
 const SERVICES = [
@@ -139,13 +139,13 @@ export default function HomePage() {
           <div className="text-center mb-14 reveal-up">
             <p className="text-orange-400 text-xs font-bold uppercase tracking-widest mb-3">Simple process</p>
             <h2 className="text-3xl md:text-4xl font-black mb-4">How TradeReach Works</h2>
-            <p className="text-gray-400 max-w-lg mx-auto">We cut out the middleman. Your request goes directly to verified local contractors — no call centers, no runaround.</p>
+            <p className="text-gray-400 max-w-lg mx-auto">We cut out the middleman. Your request goes directly to trusted local contractors — no call centers, no runaround.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { n: '01', icon: '📋', title: 'Tell Us What You Need', desc: 'Fill out our 30-second form. Tell us your service type, ZIP code, and the best time to call. No account needed.' },
-              { n: '02', icon: '🔔', title: 'We Alert Nearby Contractors', desc: 'Your request is instantly sent to licensed, vetted contractors in your area who specialize in exactly what you need.' },
+              { n: '02', icon: '🔔', title: 'We Alert Nearby Contractors', desc: 'Your request is instantly sent to trusted contractors in your area who specialize in exactly what you need.' },
               { n: '03', icon: '📞', title: 'They Call You — Free', desc: 'Expect a call within 2 hours with a free estimate. No obligation to hire. Compare quotes and choose who you want.' },
             ].map((s, i) => (
               <div key={s.n} className="premium-card reveal-up relative bg-white/3 border border-white/8 rounded-2xl p-8 hover:border-orange-500/30 transition-all" style={{ animationDelay: `${i * 0.1}s` }}>
@@ -165,7 +165,7 @@ export default function HomePage() {
           <div className="text-center mb-14 reveal-up">
             <p className="text-orange-400 text-xs font-bold uppercase tracking-widest mb-3">What we cover</p>
             <h2 className="text-3xl md:text-4xl font-black mb-4">Every Major Home Service</h2>
-            <p className="text-gray-400 max-w-lg mx-auto">From emergency repairs to planned upgrades, we have verified contractors ready for any job.</p>
+            <p className="text-gray-400 max-w-lg mx-auto">From emergency repairs to planned upgrades, we have trusted contractors ready for any job.</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 stagger-children">

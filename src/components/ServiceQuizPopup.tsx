@@ -324,7 +324,7 @@ export default function ServiceQuizPopup() {
                 Contractors available in your area
               </div>
               <h2 className="text-xl font-black text-white mb-1">Almost there! Where should we send your quotes?</h2>
-              <p className="text-gray-500 text-sm mb-5">A licensed roofer will call you within 2 hours — free, no obligation</p>
+              <p className="text-gray-500 text-sm mb-5">A trusted local roofer will call you within 2 hours — free, no obligation</p>
 
               {error && (
                 <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-xl mb-4">
@@ -392,7 +392,7 @@ export default function ServiceQuizPopup() {
               </div>
               <h2 className="text-xl font-black text-white mb-3">You're all set, {answers.name.split(' ')[0]}!</h2>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                A licensed roofing contractor in your area will call you within <strong className="text-white">2 hours</strong> with a free, no-obligation estimate.
+                A trusted local roofing contractor in your area will call you within <strong className="text-white">2 hours</strong> with a free, no-obligation estimate.
               </p>
               <div className="bg-white/4 border border-white/8 rounded-xl p-4 text-left mb-6">
                 <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">What happens next</p>

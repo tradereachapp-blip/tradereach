@@ -44,6 +44,9 @@ export interface Contractor {
   leads_reset_at: string | null
   promo_code: string | null
   promo_expires_at: string | null
+  email_notifications: boolean
+  sms_notifications: boolean
+  sms_notification_phone: string | null
 }
 
 export interface LeadClaim {
