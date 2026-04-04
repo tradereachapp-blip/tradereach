@@ -5,13 +5,33 @@ import { useRouter } from 'next/navigation'
 
 export default function AdminLoginPage() {
   const router = useRouter()
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    // Redirect with admin_key query param — middleware checks it
-    router.push(`/admin?admin_key=${encodeURIComponent(password)}`)
+    setError('')
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      })
+      if (res.ok) {
+        router.push('/admin')
+        router.refresh()
+      } else {
+        const data = await res.json()
+        setError(data.error || 'Invalid credentials')
+      }
+    } catch {
+      setError('Something went wrong. Try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -23,16 +43,34 @@ export default function AdminLoginPage() {
           </div>
           <span className="font-bold text-white">Admin Access</span>
         </div>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input
+            type="text"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+            placeholder="Username"
+            autoComplete="username"
+            required
+          />
           <input
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-orange-400"
-            placeholder="Admin password"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+            placeholder="Password"
+            autoComplete="current-password"
+            required
           />
-          <button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg">
-            Access Admin Panel
+          {error && (
+            <p className="text-red-400 text-sm">{error}</p>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition-all disabled:opacity-50"
+          >
+            {loading ? 'Checking...' : 'Access Admin Panel'}
           </button>
         </form>
       </div>
