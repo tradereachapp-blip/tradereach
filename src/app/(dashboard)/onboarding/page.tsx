@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import LogoBadge from '@/components/LogoBadge'
 import type { Niche } from '@/types'
+import { PRICING } from '@/lib/pricing'
 
 // ─── Rex speech bubble messages per step ────────────────────────────────────
 const REX_MESSAGES: Record<number, string> = {
@@ -493,7 +494,7 @@ export default function OnboardingPage() {
                 <div className="flex flex-wrap gap-2 mb-5">
                   {zipCodes.map(z => (
                     <span key={z} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 border border-orange-500/25 text-orange-300 rounded-lg text-sm font-medium">
-                      📍 {z}
+                      �Ⓧ {z}
                       <button onClick={() => setZipCodes(zipCodes.filter(x => x !== z))} className="text-orange-400 hover:text-red-400 font-bold ml-0.5 transition-colors">×</button>
                     </span>
                   ))}
@@ -651,12 +652,12 @@ export default function OnboardingPage() {
                       <p className="text-blue-400 text-xs font-medium">7-day free trial</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-2xl font-black text-white">$397</span>
+                      <span className="text-2xl font-black text-white">{`$${PRICING.PRO_MONTHLY}`}</span>
                       <span className="text-gray-500 text-sm">/mo</span>
                     </div>
                   </div>
                   <ul className="text-sm text-gray-300 space-y-1.5 mb-4">
-                    <li className="flex items-center gap-2"><span className="text-green-400 text-xs">✓</span> 30 leads/month included</li>
+                    <li className="flex items-center gap-2"><span className="text-green-400 text-xs">✓</span> {PRICING.PRO_LEAD_CAP} leads/month included</li>
                     <li className="flex items-center gap-2"><span className="text-green-400 text-xs">✓</span> Up to 10 ZIP codes</li>
                     <li className="flex items-center gap-2"><span className="text-green-400 text-xs">✓</span> Shared territory</li>
                   </ul>
@@ -677,7 +678,7 @@ export default function OnboardingPage() {
                       <p className="text-orange-300 text-xs font-medium">7-day free trial</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-2xl font-black text-white">$697</span>
+                      <span className="text-2xl font-black text-white">{`$${PRICING.ELITE_MONTHLY}`}</span>
                       <span className="text-orange-300 text-sm">/mo</span>
                     </div>
                   </div>
