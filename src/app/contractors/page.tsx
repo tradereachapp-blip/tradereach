@@ -1,4 +1,5 @@
 import LogoBadge from '@/components/LogoBadge'
+import { PRICING } from '@/lib/pricing'
 
 export const metadata = {
   title: 'TradeReach — Home Service Leads for Contractors',
@@ -128,13 +129,13 @@ export default function ContractorsPage() {
             <div className="bg-blue-900/25 border border-blue-500/40 rounded-2xl p-6">
               <h4 className="font-bold text-white text-xl mb-1">Pro</h4>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-4xl font-black text-white">$397</span>
+                <span className="text-4xl font-black text-white">{`$${PRICING.PRO_MONTHLY}`}</span>
                 <span className="text-gray-400 text-sm">/mo</span>
               </div>
               <p className="text-blue-400 text-xs mb-6">7-day free trial included</p>
               <ul className="text-sm text-gray-300 space-y-2.5 mb-8">
-                <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> 30 leads/month included</li>
-                <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> $25/lead after monthly cap</li>
+                <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> {PRICING.PRO_LEAD_CAP} leads/month included</li>
+                <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> ${PRICING.PRO_OVERAGE}/lead after monthly cap</li>
                 <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> Up to 10 ZIP codes</li>
                 <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> Email &amp; SMS alerts</li>
                 <li className="flex gap-2"><span className="text-gray-600">–</span> Shared territory</li>
@@ -153,7 +154,7 @@ export default function ContractorsPage() {
               </div>
               <h4 className="font-bold text-white text-xl mb-1 mt-2">Elite</h4>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-4xl font-black text-white">$697</span>
+                <span className="text-4xl font-black text-white">{`$${PRICING.ELITE_MONTHLY}`}</span>
                 <span className="text-gray-400 text-sm">/mo</span>
               </div>
               <p className="text-orange-400 text-xs mb-6">7-day free trial included</p>
