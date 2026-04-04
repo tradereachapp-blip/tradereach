@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       await admin.from('contractors').update({ stripe_customer_id: customerId }).eq('id', contractor.id)
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tradereachapp.com'
     const session = await createSubscriptionCheckout({
       contractorId: contractor.id, planType: plan_type, email: user.email!,
       stripeCustomerId: customerId,
