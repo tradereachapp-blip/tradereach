@@ -25,8 +25,11 @@ export default async function DashboardPage() {
     contractor.plan_type === 'pay_per_lead' ||
     ['active', 'trialing'].includes(contractor.subscription_status)
 
+  const safeZipCodes = contractor.zip_codes ?? []
+  const safeNiche = contractor.niche ?? ''
+
   let leads: Lead[] = []
-  if (isActive && contractor.zip_codes.length > 0) {
+  if (isActive && safeZipCodes.length > 0) {
     const now = new Date()
     const eliteWindowStart = new Date(now.getTime() - ELITE_PRIORITY_WINDOW_MINUTES * 60 * 1000)
 
@@ -34,8 +37,8 @@ export default async function DashboardPage() {
       .from('leads')
       .select('*')
       .eq('status', 'available')
-      .eq('niche', contractor.niche)
-      .in('zip', contractor.zip_codes)
+      .eq('niche', safeNiche)
+      .in('zip', safeZipCodes)
       .order('created_at', { ascending: false })
 
     if (contractor.plan_type !== 'elite') {
@@ -51,8 +54,8 @@ export default async function DashboardPage() {
       {/* Real-time lead alert siren */}
       <LeadAlertSiren
         contractorId={contractor.id}
-        niche={contractor.niche}
-        zipCodes={contractor.zip_codes}
+        niche={safeNiche}
+        zipCodes={safeZipCodes}
         isElite={contractor.plan_type === 'elite'}
         initialLeadIds={leads.map(l => l.id)}
         alertSound={contractor.alert_sound ?? 'siren'}
@@ -62,7 +65,7 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight">Available Leads</h1>
           <p className="text-gray-500 text-sm mt-0.5">
-            {contractor.niche} · {contractor.zip_codes.length} ZIP{contractor.zip_codes.length !== 1 ? 's' : ''} covered
+            {safeNiche} · {safeZipCodes.length} ZIP{safeZipCodes.length !== 1 ? 's' : ''} covered
           </p>
         </div>
         <div className="flex items-center gap-2">
