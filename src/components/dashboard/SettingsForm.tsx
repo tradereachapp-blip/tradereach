@@ -71,7 +71,7 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
   const [infoMsg, setInfoMsg] = useState('')
 
   // ZIP codes
-  const [zipCodes, setZipCodes] = useState<string[]>(contractor.zip_codes)
+  const [zipCodes, setZipCodes] = useState<string[]>(contractor.zip_codes ?? [])
   const [zipInput, setZipInput] = useState('')
   const [zipError, setZipError] = useState('')
   const [savingZips, setSavingZips] = useState(false)
