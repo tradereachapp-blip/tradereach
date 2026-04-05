@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export default function LeadCaptureForm() {
   const [form, setForm] = useState({
@@ -8,6 +8,25 @@ export default function LeadCaptureForm() {
   })
   // Bot protection: track when the form first loaded
   const [loadTime] = useState(() => Date.now())
+  const trustedformRef = useRef<HTMLInputElement>(null)
+
+  // Load TrustedForm script
+  useEffect(() => {
+    if (document.getElementById('tf-script')) return
+    const field = document.createElement('input')
+    field.id = 'xxTrustedFormCertUrl'
+    field.name = 'xxTrustedFormCertUrl'
+    field.type = 'hidden'
+    field.value = ''
+    document.body.appendChild(field)
+
+    const script = document.createElement('script')
+    script.id = 'tf-script'
+    script.type = 'text/javascript'
+    script.async = true
+    script.src = `https://api.trustedform.com/trustedform.js?provide_referrer=false&field=xxTrustedFormCertUrl&l=${Date.now()}${Math.random()}`
+    document.body.appendChild(script)
+  }, [])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -38,12 +57,17 @@ export default function LeadCaptureForm() {
     setLoading(true)
 
     try {
+      // Capture TrustedForm cert URL if available
+      const tfField = document.getElementById('xxTrustedFormCertUrl') as HTMLInputElement | null
+      const trustedform_cert_url = tfField?.value || null
+
       const res = await fetch('/api/leads/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
           zip: form.zip.trim(),
+          trustedform_cert_url,
           _t: loadTime,           // form load timestamp
           _hp: '',                // honeypot (intentionally empty)
         }),
@@ -237,8 +261,11 @@ export default function LeadCaptureForm() {
               className={`mt-1 w-4 h-4 rounded text-orange-500 flex-shrink-0 accent-orange-500 ${errors.tcpa_consent ? 'outline outline-red-400' : ''}`}
             />
             <span className="text-xs text-gray-400 leading-relaxed">
-              By submitting this form, I consent to be contacted by licensed contractors in my area regarding my home service request. I understand I may be contacted by phone, text, or email.{' '}
-              <strong className="text-gray-300">This consent is not a condition of purchase.</strong>
+              By checking this box and submitting this form, I provide my <strong className="text-gray-300">prior express written consent</strong> to be contacted by TradeReach and its network of licensed contractors via automated telephone calls, prerecorded messages, and/or text messages (SMS) at the phone number I provided, even if my number is on a Do Not Call registry. Message and data rates may apply. I understand this consent is not a condition of purchase or service. I also agree to TradeReach's{' '}
+              <a href="/terms/homeowner" target="_blank" className="text-orange-400 underline hover:text-orange-300">Terms of Service</a>{' '}
+              and{' '}
+              <a href="/privacy" target="_blank" className="text-orange-400 underline hover:text-orange-300">Privacy Policy</a>.
+              Reply STOP to opt out of SMS at any time.
             </span>
           </label>
           {errors.tcpa_consent && <p className="text-red-400 text-xs mt-1 ml-7">{errors.tcpa_consent}</p>}

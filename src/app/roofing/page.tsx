@@ -1,4 +1,5 @@
 import LandingLeadForm from '@/components/LandingLeadForm'
+import SiteFooter from '@/components/SiteFooter'
 
 export const metadata = {
   title: 'Free Roofing Estimate — Trusted Local Roofers in Los Angeles',
@@ -70,6 +71,7 @@ export default function RoofingPage() {
         </div>
 
       </div>
+      <SiteFooter />
     </div>
   )
 }

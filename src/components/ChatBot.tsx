@@ -82,6 +82,13 @@ export default function ChatBot({ contractorName, contractorId }: ChatBotProps) 
   const [bubblePulse, setBubblePulse] = useState(false)
   const [collectingInfo, setCollectingInfo] = useState(false)
 
+  // Support escalation state
+  const [escalationState, setEscalationState] = useState<null | 'offer' | 'form' | 'done'>(null)
+  const [escalationSubject, setEscalationSubject] = useState('')
+  const [escalationMessage, setEscalationMessage] = useState('')
+  const [escalationSubmitting, setEscalationSubmitting] = useState(false)
+  const [escalationEmail, setEscalationEmail] = useState('')
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -187,16 +194,53 @@ export default function ChatBot({ contractorName, contractorId }: ChatBotProps) 
 
       if (!res.ok || data.error) throw new Error(data.error ?? 'AI error')
 
+      if (data.sessionId) setSessionId(data.sessionId)
+
+      // Handle pre-AI escalation (situations 1, 3, 4)
+      if (data.escalationTrigger && !data.content) {
+        setEscalationSubject(data.suggestedSubject ?? '')
+        setEscalationMessage(`Issue: ${text.trim()}\n\nPlease help me with this.`)
+        const offerMsg: Message = {
+          id: (Date.now()+1).toString(), role: 'assistant',
+          content: `I want to make sure you get the right help on this. Want me to send a message to our support team? They typically respond within a few hours during business hours.`,
+          timestamp: new Date(), reaction: null, readReceipt: 'read',
+        }
+        setMessages(prev => [...prev, offerMsg])
+        setEscalationState('offer')
+        setRexAnimation('idle', 0)
+        if (soundEnabled) playChime()
+        haptic([10])
+        return
+      }
+
+      // Normal AI response
       const aiMsg: Message = {
         id: (Date.now()+1).toString(), role: 'assistant', content: data.content,
         timestamp: new Date(), reaction: null, readReceipt: 'read',
       }
       setMessages(prev => [...prev, aiMsg])
-      if (data.sessionId) setSessionId(data.sessionId)
       if (data.suggestions?.length) setSuggestions(data.suggestions)
       setRexAnimation('idle', 0)
       if (soundEnabled) playChime()
       haptic([10])
+
+      // Handle post-AI escalation (situations 2 + 5)
+      if (data.escalationTrigger && data.content) {
+        setTimeout(() => {
+          setEscalationSubject(data.suggestedSubject ?? text.trim().slice(0, 80))
+          setEscalationMessage(`I was asking about: ${text.trim()}\n\nAdditional context: [add any details here]`)
+          const offerMsg: Message = {
+            id: (Date.now()+50).toString(), role: 'assistant',
+            content: data.escalationTrigger === 'no_resolution'
+              ? `I want to make sure this gets handled properly. Want me to connect you with our support team? Our team is good at this — let me get them on it.`
+              : `I want to make sure you get the right help on this. Want me to send a message to our support team? They typically respond within a few hours during business hours.`,
+            timestamp: new Date(), reaction: null, readReceipt: 'read',
+          }
+          setMessages(prev => [...prev, offerMsg])
+          setEscalationState('offer')
+          if (soundEnabled) playChime()
+        }, 1000)
+      }
 
       // Detect contact info in user message
       const emailMatch = text.match(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i)
@@ -237,6 +281,47 @@ export default function ChatBot({ contractorName, contractorId }: ChatBotProps) 
         }])
         if (soundEnabled) playChime()
       }, 500)
+    }
+  }
+
+  async function handleEscalationSubmit() {
+    if (!escalationSubject.trim() || !escalationMessage.trim()) return
+    setEscalationSubmitting(true)
+    try {
+      const conversationContext = messages.slice(-5).map(m => ({ role: m.role, content: m.content }))
+      const res = await fetch('/api/support', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: escalationSubject.trim(),
+          message: escalationMessage.trim(),
+          conversation_context: conversationContext,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setEscalationState('done')
+        const replyEmail = escalationEmail || 'your account email'
+        const confirmMsg: Message = {
+          id: (Date.now()+2).toString(), role: 'assistant',
+          content: `Done. Your message is on its way to our team. You'll hear back at ${replyEmail} within 24 hours. Ticket ID: ${data.short_id}. Anything else I can help with?`,
+          timestamp: new Date(), reaction: null, readReceipt: 'read',
+        }
+        setMessages(prev => [...prev, confirmMsg])
+        setSuggestions(DEFAULT_CHIPS)
+        if (soundEnabled) playChime()
+      } else {
+        setMessages(prev => [...prev, {
+          id: Date.now().toString(), role: 'assistant',
+          content: `Something went wrong submitting your request. Please email us directly at support@tradereachapp.com`,
+          timestamp: new Date(), reaction: null,
+        }])
+        setEscalationState(null)
+      }
+    } catch {
+      setEscalationState(null)
+    } finally {
+      setEscalationSubmitting(false)
     }
   }
 
@@ -391,8 +476,64 @@ export default function ChatBot({ contractorName, contractorId }: ChatBotProps) 
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Chips */}
-          {suggestions.length > 0 && !loading && (
+          {/* ── Escalation: Offer Buttons ───────────────────────────────────── */}
+          {escalationState === 'offer' && (
+            <div className="px-3 pb-3 pt-2 flex-shrink-0 border-t border-white/8 space-y-2">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setEscalationState('form')}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 transition-colors active:scale-95"
+                >
+                  Yes, send them a message
+                </button>
+                <button
+                  onClick={() => { setEscalationState(null); setSuggestions(DEFAULT_CHIPS) }}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-400 bg-[#1a2744] hover:bg-white/8 transition-colors active:scale-95"
+                >
+                  No, I'm good
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── Escalation: Support Form ────────────────────────────────────── */}
+          {escalationState === 'form' && (
+            <div className="px-3 pb-3 pt-2 flex-shrink-0 border-t border-white/8 space-y-2.5">
+              <p className="text-xs text-gray-500 font-medium">We'll reply to <span className="text-gray-400">{escalationEmail || 'your email on file'}</span> within 24 hours.</p>
+              <input
+                type="text"
+                value={escalationSubject}
+                onChange={e => setEscalationSubject(e.target.value)}
+                placeholder="Subject"
+                className="w-full bg-[#1a2744] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:border-orange-500/50"
+              />
+              <textarea
+                value={escalationMessage}
+                onChange={e => setEscalationMessage(e.target.value)}
+                placeholder="Describe your issue..."
+                rows={3}
+                className="w-full bg-[#1a2744] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:border-orange-500/50 resize-none"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setEscalationState('offer')}
+                  className="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-medium text-gray-500 bg-[#1a2744] hover:text-gray-300 transition-colors"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={handleEscalationSubmit}
+                  disabled={!escalationSubject.trim() || !escalationMessage.trim() || escalationSubmitting}
+                  className="flex-1 py-2 rounded-xl text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-40 transition-colors active:scale-95"
+                >
+                  {escalationSubmitting ? 'Sending...' : 'Send to Support'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── Normal: Chips ───────────────────────────────────────────────── */}
+          {!escalationState && suggestions.length > 0 && !loading && (
             <div className="px-3 pb-2 flex gap-2 overflow-x-auto flex-shrink-0" style={{ scrollbarWidth: 'none' }}>
               {suggestions.map(c => (
                 <button key={c} onClick={() => sendMessage(c)}
@@ -403,26 +544,28 @@ export default function ChatBot({ contractorName, contractorId }: ChatBotProps) 
             </div>
           )}
 
-          {/* Input */}
-          <div className="px-3 pb-3 pt-2 flex-shrink-0 border-t border-white/8">
-            <div className="flex gap-2 items-end">
-              <input ref={inputRef} type="text" value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input) } }}
-                placeholder="Ask Rex anything…"
-                className="flex-1 bg-[#1a2744] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-orange-500/60 transition-colors"
-                style={{ fontSize: '16px' }}
-                disabled={loading}
-              />
-              <button onClick={() => sendMessage(input)} disabled={!input.trim() || loading}
-                className="flex-shrink-0 w-10 h-10 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 flex items-center justify-center transition-all active:scale-95">
-                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                </svg>
-              </button>
+          {/* ── Normal: Input ───────────────────────────────────────────────── */}
+          {(escalationState === null || escalationState === 'done') && (
+            <div className="px-3 pb-3 pt-2 flex-shrink-0 border-t border-white/8">
+              <div className="flex gap-2 items-end">
+                <input ref={inputRef} type="text" value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input) } }}
+                  placeholder="Ask Rex anything…"
+                  className="flex-1 bg-[#1a2744] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-orange-500/60 transition-colors"
+                  style={{ fontSize: '16px' }}
+                  disabled={loading}
+                />
+                <button onClick={() => sendMessage(input)} disabled={!input.trim() || loading}
+                  className="flex-shrink-0 w-10 h-10 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 flex items-center justify-center transition-all active:scale-95">
+                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-center text-[9px] text-gray-700 mt-1.5">Powered by Claude AI · Ask Rex anything</p>
             </div>
-            <p className="text-center text-[9px] text-gray-700 mt-1.5">Powered by Claude AI · Ask Rex anything</p>
-          </div>
+          )}
         </div>
       )}
 

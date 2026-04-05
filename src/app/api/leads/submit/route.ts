@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, phone, zip, niche, description, callback_time, tcpa_consent, _hp, _t } = body
+    const { name, phone, zip, niche, description, callback_time, tcpa_consent, trustedform_cert_url, _hp, _t } = body
 
     // ── Bot check 4: Honeypot field must be empty ──────────────────────────
     if (_hp && _hp.length > 0) {
@@ -159,6 +159,7 @@ export async function POST(request: NextRequest) {
         description: description?.trim() || null,
         callback_time: callback_time || null,
         tcpa_consent: true,
+        trustedform_cert_url: trustedform_cert_url || null,
         status: 'available',
       })
       .select()

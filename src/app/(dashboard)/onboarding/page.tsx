@@ -54,7 +54,7 @@ function RexBanner({ step, fieldsDone }: { step: number; fieldsDone?: boolean })
   )
 }
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7
+type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 interface PromoState {
   input: string
@@ -129,7 +129,7 @@ const inp = 'dark-input'
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const [step, setStep] = useState<Step>(1)
+  const [step, setStep] = useState<Step>(0)
   const [visible, setVisible] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -155,6 +155,31 @@ export default function OnboardingPage() {
   const [smsPhoneError, setSmsPhoneError] = useState('')
   const [notificationEmail, setNotificationEmail] = useState('')
   const [notifEmailError, setNotifEmailError] = useState('')
+
+  // Legal agreement (step 0)
+  const [legalScrolled, setLegalScrolled] = useState(false)
+  const [legalAccepting, setLegalAccepting] = useState(false)
+  const legalScrollRef = useRef<HTMLDivElement>(null)
+
+  function handleLegalScroll() {
+    const el = legalScrollRef.current
+    if (!el) return
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50
+    if (nearBottom) setLegalScrolled(true)
+  }
+
+  async function handleLegalAccept() {
+    setLegalAccepting(true)
+    try {
+      await fetch('/api/legal/accept', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agreement_type: 'contractor_tos', agreement_version: '1.0' }),
+      })
+    } catch {}
+    setLegalAccepting(false)
+    goToStep(1)
+  }
 
   // Pre-fill notification email from auth session
   useEffect(() => {
@@ -291,7 +316,7 @@ export default function OnboardingPage() {
     }
   }
 
-  const progressPct = ((step - 1) / (STEP_LABELS.length - 1)) * 100
+  const progressPct = step <= 1 ? 0 : ((step - 1) / (STEP_LABELS.length - 1)) * 100
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950/40 to-gray-950 relative overflow-hidden">
@@ -335,6 +360,67 @@ export default function OnboardingPage() {
 
       <div className="max-w-lg mx-auto px-4 py-8 relative z-10">
         <StepCard visible={visible}>
+
+          {/* ── STEP 0: LEGAL AGREEMENT ─────────────────────────────────── */}
+          {step === 0 && (
+            <div className="flex flex-col items-center justify-center min-h-[90vh] py-8">
+              <div className="mb-5">
+                <LogoBadge className="h-10" href="/" />
+              </div>
+              <div className="w-full max-w-md">
+                <div className="text-center mb-5">
+                  <h2 className="text-2xl font-black text-white mb-1">Before we get started</h2>
+                  <p className="text-gray-400 text-sm">Please read and accept our Contractor Terms of Service.</p>
+                </div>
+
+                {/* Scrollable terms */}
+                <div
+                  ref={legalScrollRef}
+                  onScroll={handleLegalScroll}
+                  className="bg-gray-900 border border-white/10 rounded-2xl p-5 h-72 overflow-y-auto text-sm text-gray-300 space-y-4 leading-relaxed mb-4"
+                  style={{ scrollbarWidth: 'thin', scrollbarColor: '#374151 transparent' }}
+                >
+                  <p className="font-bold text-white text-base">TradeReach Contractor Terms of Service — v1.0</p>
+
+                  <p><strong className="text-gray-200">1. Marketplace — Not a Lead Guarantee.</strong> TradeReach connects you with homeowners who have requested quotes. We do not guarantee any lead will result in a job, callback, or sale. Leads are sold as-is based on homeowner-submitted data.</p>
+
+                  <p><strong className="text-gray-200">2. Lead Credits.</strong> Credits may be issued for: duplicate leads, disconnected phone numbers, or homeowners who did not actually submit a request. Credits are NOT issued for unresponsive homeowners, leads who hired someone else, or change of mind. See our <a href="/terms/credits" target="_blank" className="text-orange-400 underline">Lead Credit Policy</a> for full details.</p>
+
+                  <p><strong className="text-gray-200">3. License Compliance.</strong> By using TradeReach, you represent that you hold all required contractor licenses in your state and jurisdiction. You are solely responsible for verifying and maintaining your licensure.</p>
+
+                  <p><strong className="text-gray-200">4. Homeowner Conduct.</strong> You agree to treat homeowners professionally and to comply with all applicable consumer protection laws. TradeReach reserves the right to terminate access for contractor misconduct.</p>
+
+                  <p><strong className="text-gray-200">5. SMS & TCPA.</strong> By providing your phone number, you consent to receive SMS notifications about leads and platform updates. You may opt out at any time by replying STOP.</p>
+
+                  <p><strong className="text-gray-200">6. Liability Limitation.</strong> To the fullest extent permitted by law, TradeReach's total liability to you for any claims related to the service is limited to amounts paid by you in the 30 days preceding the claim. TradeReach is not liable for lost profits, missed jobs, or indirect damages.</p>
+
+                  <p><strong className="text-gray-200">7. Binding Arbitration & Class Action Waiver.</strong> Any disputes will be resolved through binding individual arbitration under JAMS rules, governed by California law. You waive any right to participate in a class action lawsuit or class-wide arbitration.</p>
+
+                  <p><strong className="text-gray-200">8. Termination.</strong> TradeReach may suspend or terminate your account at any time for violation of these terms, fraudulent activity, or abuse of the credit request system.</p>
+
+                  <p><strong className="text-gray-200">9. Changes to Terms.</strong> We may update these terms. When we do, we will notify you and require re-acceptance before continued use of the platform.</p>
+
+                  <p className="text-gray-500 text-xs pt-2">By clicking "I Agree & Continue" below, you acknowledge that you have read, understood, and agree to be bound by these Contractor Terms of Service. Full terms available at <a href="/terms/contractor" target="_blank" className="text-orange-400 underline">/terms/contractor</a>.</p>
+                </div>
+
+                {!legalScrolled && (
+                  <p className="text-center text-xs text-gray-500 mb-3 animate-pulse">↓ Scroll to the bottom to continue</p>
+                )}
+
+                <button
+                  onClick={handleLegalAccept}
+                  disabled={!legalScrolled || legalAccepting}
+                  className="w-full py-4 rounded-2xl text-white font-black text-base transition-all bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed shadow-xl shadow-orange-500/20"
+                >
+                  {legalAccepting ? 'Recording acceptance...' : 'I Agree & Continue →'}
+                </button>
+
+                <p className="text-center text-xs text-gray-600 mt-3">
+                  Your acceptance is logged with timestamp and IP for your records.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* ── STEP 1: WELCOME ─────────────────────────────────────────── */}
           {step === 1 && (
@@ -807,27 +893,4 @@ export default function OnboardingPage() {
                   { icon: '📍', title: 'Update your ZIPs anytime', desc: 'Expand your territory in Settings.' },
                   { icon: '🏆', title: 'Go Elite for exclusivity', desc: 'No competing contractors in your territory.' },
                 ].map(tip => (
-                  <div key={tip.title} className="flex items-start gap-3 bg-white/4 border border-white/8 rounded-xl p-4 text-left">
-                    <span className="text-xl mt-0.5">{tip.icon}</span>
-                    <div>
-                      <div className="font-bold text-white text-sm">{tip.title}</div>
-                      <div className="text-gray-500 text-xs mt-0.5">{tip.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="w-full bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black py-4 rounded-2xl transition-all text-lg shadow-xl shadow-orange-500/25"
-              >
-                Go to My Dashboard →
-              </button>
-            </div>
-          )}
-
-        </StepCard>
-      </div>
-    </div>
-  )
-}
+                  <div key={tip.title} className="flex items-start gap-3 bg-white/4 border border-white/8 roun

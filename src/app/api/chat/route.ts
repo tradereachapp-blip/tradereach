@@ -47,7 +47,38 @@ CANCELLATION RETENTION: If a contractor mentions wanting to cancel, first ask wh
 
 Always be helpful, friendly, and concise. Use the contractor's first name when you know it. Use occasional relevant emojis — maximum one per response. Keep responses short and conversational. Use line breaks to make responses easy to read on mobile. Never make up information about the platform.`
 
-// Detect if message requires escalation
+// ── Support escalation trigger detection ─────────────────────────────────────
+// Returns an escalation type or null. Checked BEFORE calling the AI.
+function detectEscalationTrigger(text: string): 'support_request' | 'billing' | 'technical' | null {
+  const t = text.toLowerCase()
+
+  // Situation 1: Explicit support request
+  if (/contact support|talk to (someone|a person|human|agent|rep)|speak to (a |someone|human)|get help|send.*message.*support|reach.*support|talk.*support|human support|real person/.test(t)) {
+    return 'support_request'
+  }
+
+  // Situation 3: Billing issues
+  if (/billing|charge|refund|overcharged|cancel|payment|invoice|double.charged|charged wrong|wrong amount/.test(t)) {
+    return 'billing'
+  }
+
+  // Situation 4: Technical issues
+  if (/broken|not working|bug|error|glitch|missing leads|wrong leads|can.t access|cannot access|not loading|crashed|keeps crashing/.test(t)) {
+    return 'technical'
+  }
+
+  return null
+}
+
+// Check if AI response signals uncertainty (Situation 2)
+function aiResponseUncertain(aiText: string): boolean {
+  const lower = aiText.toLowerCase()
+  return (
+    /i.m not sure|i don.t know|i cannot help|i can.t help|contact support|reach out to.*team|not able to answer/.test(lower)
+  )
+}
+
+// Detect escalation from old explicit triggers (kept for escalation table)
 function requiresEscalation(text: string): boolean {
   const triggers = [
     /refund/i, /bug/i, /broken/i, /not work/i, /doesn.t work/i,
@@ -55,6 +86,15 @@ function requiresEscalation(text: string): boolean {
     /cancel.*account/i, /want.*cancel/i, /charged.*wrong/i, /double.charged/i,
   ]
   return triggers.some(t => t.test(text))
+}
+
+// Priority detection (mirrors /api/support but inline for context inference)
+function inferPriorityFromText(text: string): 'urgent' | 'high' | 'normal' | 'low' {
+  const t = text.toLowerCase()
+  if (/payment failed|cannot access|locked out|lost leads|account suspended/.test(t)) return 'urgent'
+  if (/billing|refund|overcharged|technical error|leads not showing|not working|broken|error/.test(t)) return 'high'
+  if (/feedback|suggestion|compliment|great|love|appreciate/.test(t)) return 'low'
+  return 'normal'
 }
 
 export async function POST(request: NextRequest) {
@@ -76,6 +116,27 @@ export async function POST(request: NextRequest) {
     const admin = createAdminClient()
     const lastUserMessage = messages[messages.length - 1]?.content ?? ''
     const startTime = Date.now()
+
+    // ── Situation 1, 3, 4: Pre-AI trigger detection ───────────────────────
+    const preTrigger = detectEscalationTrigger(lastUserMessage)
+    if (preTrigger) {
+      // Return escalation signal immediately without calling AI
+      const suggestedSubject = preTrigger === 'billing'
+        ? 'Billing question'
+        : preTrigger === 'technical'
+        ? 'Technical issue with the platform'
+        : 'Support request'
+      const priority = inferPriorityFromText(lastUserMessage)
+      return Response.json({
+        content: null, // client will show escalation UI
+        sessionId: activeSessionId,
+        suggestions: [],
+        needsEscalation: false,
+        escalationTrigger: preTrigger,
+        suggestedSubject,
+        priority,
+      })
+    }
 
     // 1. Check / create session
     let activeSessionId = sessionId
@@ -202,11 +263,24 @@ export async function POST(request: NextRequest) {
     // 8. Generate contextual follow-up suggestions
     const suggestions = generateSuggestions(lastUserMessage, aiText)
 
+    // Situation 2: AI response signals uncertainty
+    const aiUncertain = aiResponseUncertain(aiText)
+
+    // Situation 5: After 3+ assistant messages without positive resolution
+    const assistantMsgCount = messages.filter(m => m.role === 'assistant').length
+    const shouldProactivelyEscalate = assistantMsgCount >= 3 && !aiText.toLowerCase().includes('glad') && !aiText.toLowerCase().includes('great') && !aiText.toLowerCase().includes('solved')
+
+    const escalationTrigger = aiUncertain ? 'uncertain_response' : shouldProactivelyEscalate ? 'no_resolution' : null
+    const suggestedSubject = escalationTrigger ? lastUserMessage.slice(0, 80) : null
+
     return Response.json({
       content: aiText,
       sessionId: activeSessionId,
       suggestions,
       needsEscalation,
+      escalationTrigger,
+      suggestedSubject,
+      priority: escalationTrigger ? inferPriorityFromText(lastUserMessage) : null,
     })
 
   } catch (err) {

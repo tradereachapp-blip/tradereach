@@ -1,3 +1,4 @@
+import SiteFooter from '@/components/SiteFooter'
 import LandingLeadForm from '@/components/LandingLeadForm'
 
 export const metadata = {
@@ -70,6 +71,7 @@ export default function HvacPage() {
         </div>
 
       </div>
+      <SiteFooter />
     </div>
   )
 }

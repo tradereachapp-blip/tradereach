@@ -1,6 +1,7 @@
 import LeadCaptureForm from '@/components/forms/LeadCaptureForm'
 import ServiceQuizPopup from '@/components/ServiceQuizPopup'
 import LogoBadge from '@/components/LogoBadge'
+import SiteFooter from '@/components/SiteFooter'
 
 export const metadata = {
   title: 'Get a Free Quote From a Trusted Local Contractor | TradeReach',
@@ -323,18 +324,7 @@ export default function HomePage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-white/8 py-8 px-4 bg-gray-950">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
-          <LogoBadge className="h-11" footer />
-          <div className="flex flex-wrap justify-center gap-6 text-gray-500 text-xs">
-            <a href="/contractors" className="hover:text-gray-300 transition-colors">For Contractors</a>
-            <a href="/login" className="hover:text-gray-300 transition-colors">Contractor Login</a>
-            <a href="/refund-policy" className="hover:text-gray-300 transition-colors">Refund Policy</a>
-            <a href="mailto:support@tradereachapp.com" className="hover:text-gray-300 transition-colors">Contact</a>
-          </div>
-          <p className="text-gray-600 text-xs text-center">&copy; {new Date().getFullYear()} TradeReach LLC. All rights reserved.</p>
-        </div>
-      </footer>
+      <SiteFooter />
 
       {/* ── SERVICE QUIZ POPUP ── */}
       <ServiceQuizPopup />

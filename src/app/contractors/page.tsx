@@ -1,5 +1,6 @@
 import LogoBadge from '@/components/LogoBadge'
 import { PRICING } from '@/lib/pricing'
+import SiteFooter from '@/components/SiteFooter'
 
 export const metadata = {
   title: 'TradeReach — Home Service Leads for Contractors',
@@ -226,19 +227,7 @@ export default function ContractorsPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/8 py-8 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
-          <LogoBadge className="h-11" footer />
-          <div className="flex gap-6 text-gray-500 text-xs">
-            <a href="/login" className="hover:text-gray-300 transition-colors">Contractor Login</a>
-            <a href="/refund-policy" className="hover:text-gray-300 transition-colors">Refund Policy</a>
-            <a href="/signup" className="hover:text-gray-300 transition-colors">Sign Up</a>
-            <a href="/" className="hover:text-gray-300 transition-colors">Homeowners</a>
-          </div>
-          <p className="text-gray-600 text-xs">© {new Date().getFullYear()} TradeReach LLC. All rights reserved.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

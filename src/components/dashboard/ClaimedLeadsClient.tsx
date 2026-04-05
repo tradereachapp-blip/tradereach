@@ -32,6 +32,12 @@ interface Toast {
   message: string
 }
 
+const CREDIT_REASONS: { value: string; label: string }[] = [
+  { value: 'duplicate_lead', label: 'Duplicate lead' },
+  { value: 'disconnected_phone', label: 'Disconnected / wrong phone number' },
+  { value: 'homeowner_did_not_submit', label: 'Homeowner did not submit this request' },
+]
+
 const STATUSES = [
   'New',
   'Contacted',
@@ -108,6 +114,11 @@ export default function ClaimedLeadsClient({ initialClaims }: { initialClaims: C
   const [savedAt, setSavedAt] = useState<Record<string, boolean>>({})
   const [toasts, setToasts] = useState<Toast[]>([])
   const [highlighted, setHighlighted] = useState<string | null>(highlightId)
+  const [creditModal, setCreditModal] = useState<string | null>(null) // claim id
+  const [creditReason, setCreditReason] = useState('')
+  const [creditDescription, setCreditDescription] = useState('')
+  const [creditSubmitting, setCreditSubmitting] = useState(false)
+  const [creditedClaims, setCreditedClaims] = useState<Set<string>>(new Set())
   const toastId = useRef(0)
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -180,6 +191,35 @@ export default function ClaimedLeadsClient({ initialClaims }: { initialClaims: C
     const newVal = Math.max(0, (claim.contact_attempts || 0) + delta)
     updateClaim(claim.id, { contact_attempts: newVal })
     await saveField(claim.id, 'contact_attempts', newVal)
+  }
+
+  async function handleCreditSubmit(claim: Claim) {
+    if (!creditReason) return
+    setCreditSubmitting(true)
+    try {
+      const res = await fetch('/api/credits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          claim_id: claim.id,
+          lead_id: claim.leads.id,
+          reason: creditReason,
+          description: creditDescription || null,
+        }),
+      })
+      if (res.ok) {
+        setCreditedClaims(prev => new Set([...prev, claim.id]))
+        setCreditModal(null)
+        setCreditReason('')
+        setCreditDescription('')
+        showToast('Credit request submitted — we\'ll review it within 24 hours')
+      } else {
+        const { error } = await res.json()
+        showToast(error ?? 'Failed to submit credit request')
+      }
+    } finally {
+      setCreditSubmitting(false)
+    }
   }
 
   // ROI Summary
@@ -390,12 +430,96 @@ export default function ClaimedLeadsClient({ initialClaims }: { initialClaims: C
                     <div>Best time: <span className="text-gray-400">{lead.callback_time ?? 'Anytime'}</span></div>
                     <div>Submitted: <span className="text-gray-400">{new Date(lead.created_at).toLocaleDateString()}</span></div>
                   </div>
+
+                  {/* Credit Request */}
+                  <div className="pt-1 border-t border-white/6">
+                    {creditedClaims.has(claim.id) ? (
+                      <p className="text-xs text-gray-500 text-center py-1">✓ Credit request submitted</p>
+                    ) : (
+                      <button
+                        onClick={() => { setCreditModal(claim.id); setCreditReason(''); setCreditDescription('') }}
+                        className="w-full text-xs font-medium text-gray-500 hover:text-orange-400 transition-colors py-1 text-center"
+                      >
+                        Problem with this lead? Request a credit →
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           )
         })}
       </div>
+
+      {/* Credit Request Modal */}
+      {creditModal && (() => {
+        const claim = claims.find(c => c.id === creditModal)
+        if (!claim) return null
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setCreditModal(null)}>
+            <div
+              className="bg-gray-900 border border-white/12 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+              onClick={e => e.stopPropagation()}
+              style={{ animation: 'slide-up 0.2s ease-out' }}
+            >
+              <div className="flex items-start justify-between mb-5">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Request a Credit</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Lead: {claim.leads.name.split(' ')[0]} · {claim.leads.niche}</p>
+                </div>
+                <button onClick={() => setCreditModal(null)} className="text-gray-600 hover:text-white transition-colors text-xl leading-none">×</button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Reason <span className="text-red-400">*</span></label>
+                  <select
+                    value={creditReason}
+                    onChange={e => setCreditReason(e.target.value)}
+                    className="w-full bg-gray-800 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500/50 transition-colors"
+                  >
+                    <option value="" style={{ backgroundColor: '#1f2937' }}>Select a reason...</option>
+                    {CREDIT_REASONS.map(r => (
+                      <option key={r.value} value={r.value} style={{ backgroundColor: '#1f2937' }}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Additional Details <span className="text-gray-600">(optional)</span></label>
+                  <textarea
+                    value={creditDescription}
+                    onChange={e => setCreditDescription(e.target.value)}
+                    placeholder="Any context that helps us review the request faster..."
+                    rows={3}
+                    className="w-full bg-gray-800 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition-colors resize-none"
+                  />
+                </div>
+
+                <div className="bg-orange-500/8 border border-orange-500/20 rounded-xl p-3">
+                  <p className="text-xs text-orange-300/80">Credits are reviewed within 24 hours. If approved, the credit is applied to your next invoice. See our <a href="/terms/credits" target="_blank" className="underline hover:text-orange-200">Lead Credit Policy</a> for eligible reasons.</p>
+                </div>
+
+                <div className="flex gap-3 pt-1">
+                  <button
+                    onClick={() => setCreditModal(null)}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-400 bg-gray-800 hover:bg-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleCreditSubmit(claim)}
+                    disabled={!creditReason || creditSubmitting}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {creditSubmitting ? 'Submitting...' : 'Submit Request'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       <Toast toasts={toasts} />
 
