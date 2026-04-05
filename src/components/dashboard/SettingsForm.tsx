@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import type { Contractor } from '@/types'
 import { NICHES } from '@/lib/config'
 import type { Niche } from '@/types'
+import PhoneInput from './PhoneInput'
+import { playAlertSound } from './LeadAlertSiren'
 
 interface Props {
   contractor: Contractor
@@ -13,6 +15,15 @@ interface Props {
 
 const darkInput = 'dark-input'
 const darkLabel = 'block text-sm font-medium text-gray-300 mb-1.5'
+
+const ALERT_SOUNDS = [
+  { value: 'siren', label: '🚨 Siren', description: 'Loud emergency alert — never miss a lead' },
+  { value: 'chime', label: '🎵 Chime', description: 'Three ascending tones, pleasant and clear' },
+  { value: 'bell', label: '🔔 Bell', description: 'Classic bell tone with long sustain' },
+  { value: 'ping', label: '💬 Ping', description: 'Short sharp notification ping' },
+  { value: 'ding', label: '🎶 Ding', description: 'Single soft ding, subtle alert' },
+  { value: 'none', label: '🔇 Silent', description: 'No sound — visual alert only' },
+]
 
 function SectionCard({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) {
   return (
@@ -39,15 +50,11 @@ function DarkButton({ onClick, disabled, children }: { onClick: () => void; disa
     <button
       onClick={onClick}
       disabled={disabled}
-      className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-5 py-2.5 rounded-xl transition-all text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+      className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-5 py-2.5 rounded-xl transition-all text-sm hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-gray-900"
     >
       {children}
     </button>
   )
-}
-
-function validateUSPhone(phone: string): boolean {
-  return /^\+?1?[\s\-.]?\(?\d{3}\)?[\s\-.]?\d{3}[\s\-.]?\d{4}$/.test(phone.trim())
 }
 
 export default function SettingsForm({ contractor, userEmail }: Props) {
@@ -79,6 +86,11 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
   const [savingNotif, setSavingNotif] = useState(false)
   const [notifMsg, setNotifMsg] = useState('')
 
+  // Alert sound
+  const [alertSound, setAlertSound] = useState(contractor.alert_sound ?? 'siren')
+  const [savingSound, setSavingSound] = useState(false)
+  const [soundMsg, setSoundMsg] = useState('')
+
   // Password
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -100,7 +112,6 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
   }
 
   function handleZipInput(val: string) {
-    // Only allow numeric characters, max 5
     const numeric = val.replace(/\D/g, '').slice(0, 5)
     setZipInput(numeric)
     setZipError('')
@@ -108,14 +119,8 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
 
   function addZip() {
     const z = zipInput.trim()
-    if (!/^\d{5}$/.test(z)) {
-      setZipError('Please enter a valid 5-digit ZIP code.')
-      return
-    }
-    if (zipCodes.includes(z)) {
-      setZipError('That ZIP code is already in your list.')
-      return
-    }
+    if (!/^\d{5}$/.test(z)) { setZipError('Please enter a valid 5-digit ZIP code.'); return }
+    if (zipCodes.includes(z)) { setZipError('Already in your list.'); return }
     setZipCodes([...zipCodes, z])
     setZipInput('')
     setZipError('')
@@ -126,25 +131,18 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
   async function saveZipCodes() {
     setSavingZips(true)
     setZipMsg('')
-    const { error } = await supabase
-      .from('contractors').update({ zip_codes: zipCodes }).eq('id', contractor.id)
+    const { error } = await supabase.from('contractors').update({ zip_codes: zipCodes }).eq('id', contractor.id)
     setZipMsg(error ? `Error: ${error.message}` : '✓ ZIP codes saved')
     setSavingZips(false)
   }
 
   async function saveNotifications() {
-    // Validate SMS notification phone if provided
-    if (smsNotifPhone.trim() && !validateUSPhone(smsNotifPhone)) {
-      setSmsPhoneError('Please enter a valid US phone number.')
-      return
-    }
-    setSmsPhoneError('')
-    // Validate notification email if provided
     if (notificationEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notificationEmail.trim())) {
       setNotifEmailError('Please enter a valid email address.')
       return
     }
     setNotifEmailError('')
+    setSmsPhoneError('')
     setSavingNotif(true)
     setNotifMsg('')
     const { error } = await supabase
@@ -160,14 +158,21 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
     setSavingNotif(false)
   }
 
+  async function saveAlertSound() {
+    setSavingSound(true)
+    setSoundMsg('')
+    const { error } = await supabase.from('contractors').update({ alert_sound: alertSound }).eq('id', contractor.id)
+    setSoundMsg(error ? `Error: ${error.message}` : '✓ Sound preference saved')
+    setSavingSound(false)
+  }
+
   async function changePassword() {
     if (newPassword !== confirmPassword) { setPassMsg('Passwords do not match.'); return }
     if (newPassword.length < 8) { setPassMsg('Password must be 8+ characters.'); return }
     setSavingPass(true)
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     setPassMsg(error ? `Error: ${error.message}` : '✓ Password updated')
-    setNewPassword('')
-    setConfirmPassword('')
+    setNewPassword(''); setConfirmPassword('')
     setSavingPass(false)
   }
 
@@ -181,18 +186,11 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
   }
 
   async function deleteAccount() {
-    if (!confirm('Are you sure? This will permanently delete your account and cancel your subscription. This cannot be undone.')) return
-    const res = await fetch('/api/contractors/settings', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-    })
+    if (!confirm('Are you sure? This will permanently delete your account and cancel your subscription.')) return
+    const res = await fetch('/api/contractors/settings', { method: 'DELETE', headers: { 'Content-Type': 'application/json' } })
     const data = await res.json()
-    if (data.success) {
-      await supabase.auth.signOut()
-      window.location.href = '/'
-    } else {
-      alert(data.error || 'Failed to delete account.')
-    }
+    if (data.success) { await supabase.auth.signOut(); window.location.href = '/' }
+    else alert(data.error || 'Failed to delete account.')
   }
 
   const planLabel = contractor.plan_type === 'elite' ? 'Elite' : contractor.plan_type === 'pro' ? 'Pro' : contractor.plan_type === 'pay_per_lead' ? 'Pay Per Lead' : null
@@ -213,21 +211,23 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
               <input type="text" value={contactName} onChange={e => setContactName(e.target.value)} className={darkInput} placeholder="John Smith" />
             </div>
           </div>
+          <PhoneInput
+            label="Business Phone"
+            value={phone}
+            onChange={setPhone}
+            placeholder="(555) 555-5555"
+          />
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={darkLabel}>Business Phone</label>
-              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className={darkInput} placeholder="(555) 555-5555" />
-            </div>
             <div>
               <label className={darkLabel}>License Number <span className="text-gray-500 font-normal">(Optional)</span></label>
               <input type="text" value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)} className={darkInput} placeholder="State license #" />
             </div>
-          </div>
-          <div>
-            <label className={darkLabel}>Service Type</label>
-            <select value={niche} onChange={e => setNiche(e.target.value as Niche)} className={darkInput}>
-              {NICHES.map(n => <option key={n} value={n} style={{ backgroundColor: '#1a2744', color: '#fff' }}>{n}</option>)}
-            </select>
+            <div>
+              <label className={darkLabel}>Service Type</label>
+              <select value={niche} onChange={e => setNiche(e.target.value as Niche)} className={darkInput}>
+                {NICHES.map(n => <option key={n} value={n} style={{ backgroundColor: '#1a2744', color: '#fff' }}>{n}</option>)}
+              </select>
+            </div>
           </div>
           <div className="flex items-center justify-between pt-2">
             <div className="text-xs text-gray-500">Logged in as <span className="text-gray-400">{userEmail}</span></div>
@@ -241,23 +241,15 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
 
       {/* Service ZIP Codes */}
       <SectionCard icon="📍" title="Service ZIP Codes">
-        <p className="text-gray-400 text-sm mb-4">Add the ZIP codes where you want to receive leads. You can update these at any time.</p>
+        <p className="text-gray-400 text-sm mb-4">Add the ZIP codes where you want to receive leads.</p>
         <div className="flex gap-2 mb-3">
           <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={zipInput}
-            onChange={e => handleZipInput(e.target.value)}
+            type="text" inputMode="numeric" pattern="[0-9]*"
+            value={zipInput} onChange={e => handleZipInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addZip())}
-            className={darkInput}
-            placeholder="e.g. 90210"
-            maxLength={5}
+            className={darkInput} placeholder="e.g. 90210" maxLength={5}
           />
-          <button
-            onClick={addZip}
-            className="px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-all whitespace-nowrap text-sm"
-          >
+          <button onClick={addZip} className="px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-all whitespace-nowrap text-sm hover:scale-[1.02]">
             Add ZIP
           </button>
         </div>
@@ -276,9 +268,7 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
         )}
         <div className="flex items-center justify-between">
           <p className="text-xs text-gray-500">{zipCodes.length} ZIP code{zipCodes.length !== 1 ? 's' : ''} configured</p>
-          <DarkButton onClick={saveZipCodes} disabled={savingZips}>
-            {savingZips ? 'Saving...' : 'Save ZIP Codes'}
-          </DarkButton>
+          <DarkButton onClick={saveZipCodes} disabled={savingZips}>{savingZips ? 'Saving...' : 'Save ZIP Codes'}</DarkButton>
         </div>
         <StatusMsg msg={zipMsg} />
       </SectionCard>
@@ -288,71 +278,98 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
         <div className="space-y-5">
           {/* Toggles */}
           <div className="space-y-3">
-            <label className="flex items-center justify-between p-4 bg-gray-800/50 border border-white/6 rounded-xl cursor-pointer hover:border-white/12 transition-colors">
-              <div className="flex items-center gap-3">
-                <span className="text-lg">📧</span>
-                <div>
-                  <div className="font-medium text-white text-sm">Email Notifications</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Receive email alerts when new leads come in</div>
+            {[
+              { label: 'Email Notifications', sub: 'Receive email alerts when new leads come in', icon: '📧', checked: emailNotif, onChange: setEmailNotif },
+              { label: 'SMS Notifications', sub: 'Receive instant text alerts for new leads', icon: '📱', checked: smsNotif, onChange: setSmsNotif },
+            ].map(({ label, sub, icon, checked, onChange }) => (
+              <label key={label} className="flex items-center justify-between p-4 bg-gray-800/50 border border-white/6 rounded-xl cursor-pointer hover:border-white/12 transition-colors">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">{icon}</span>
+                  <div>
+                    <div className="font-medium text-white text-sm">{label}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{sub}</div>
+                  </div>
                 </div>
-              </div>
-              <div className="relative flex-shrink-0">
-                <input type="checkbox" checked={emailNotif} onChange={e => setEmailNotif(e.target.checked)} className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-700 peer-checked:bg-orange-500 rounded-full transition-colors" />
-                <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5" />
-              </div>
-            </label>
-            <label className="flex items-center justify-between p-4 bg-gray-800/50 border border-white/6 rounded-xl cursor-pointer hover:border-white/12 transition-colors">
-              <div className="flex items-center gap-3">
-                <span className="text-lg">📱</span>
-                <div>
-                  <div className="font-medium text-white text-sm">SMS Notifications</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Receive instant text alerts for new leads</div>
+                <div className="relative flex-shrink-0">
+                  <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="sr-only peer" />
+                  <div className="w-11 h-6 bg-gray-700 peer-checked:bg-orange-500 rounded-full transition-colors" />
+                  <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5" />
                 </div>
-              </div>
-              <div className="relative flex-shrink-0">
-                <input type="checkbox" checked={smsNotif} onChange={e => setSmsNotif(e.target.checked)} className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-700 peer-checked:bg-orange-500 rounded-full transition-colors" />
-                <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5" />
-              </div>
-            </label>
+              </label>
+            ))}
           </div>
 
-          {/* Notification Email Address */}
+          {/* Notification Email */}
           <div className="border-t border-white/8 pt-5">
             <label className={darkLabel}>Notification Email Address</label>
-            <p className="text-xs text-gray-500 mb-2">Lead alerts will be sent to this address. Add a different email if you want notifications sent elsewhere.</p>
-            <input
-              type="email"
-              value={notificationEmail}
-              onChange={e => { setNotificationEmail(e.target.value); setNotifEmailError('') }}
-              className={darkInput}
-              placeholder={userEmail}
-            />
+            <p className="text-xs text-gray-500 mb-2">Lead alerts will be sent to this address. Leave blank to use your login email.</p>
+            <input type="email" value={notificationEmail} onChange={e => { setNotificationEmail(e.target.value); setNotifEmailError('') }} className={darkInput} placeholder={userEmail} />
             {notifEmailError && <p className="text-red-400 text-xs mt-1.5">{notifEmailError}</p>}
           </div>
 
-          {/* SMS Notification Phone */}
+          {/* SMS Notification Phone — premium input */}
           <div className="pt-4">
-            <label className={darkLabel}>SMS Notification Number</label>
-            <p className="text-xs text-gray-500 mb-2">This is the number that receives your instant lead alerts. Leave blank to use your primary business phone.</p>
-            <input
-              type="tel"
+            <PhoneInput
+              label="SMS Notification Number"
+              description="The number that receives instant lead alerts. Leave blank to use your business phone."
               value={smsNotifPhone}
-              onChange={e => { setSmsNotifPhone(e.target.value); setSmsPhoneError('') }}
-              className={darkInput}
-              placeholder="(555) 555-5555 — leave blank to use business phone"
+              onChange={setSmsNotifPhone}
+              error={smsPhoneError}
             />
-            {smsPhoneError && <p className="text-red-400 text-xs mt-1.5">{smsPhoneError}</p>}
           </div>
 
           <div className="flex justify-end">
-            <DarkButton onClick={saveNotifications} disabled={savingNotif}>
-              {savingNotif ? 'Saving...' : 'Save Preferences'}
-            </DarkButton>
+            <DarkButton onClick={saveNotifications} disabled={savingNotif}>{savingNotif ? 'Saving...' : 'Save Preferences'}</DarkButton>
           </div>
           <StatusMsg msg={notifMsg} />
         </div>
+      </SectionCard>
+
+      {/* Alert Sound */}
+      <SectionCard icon="🔊" title="Alert Sound">
+        <p className="text-gray-400 text-sm mb-5">Choose the alert sound you hear when a new lead arrives in your territory.</p>
+        <div className="space-y-2 mb-5">
+          {ALERT_SOUNDS.map(({ value, label, description }) => (
+            <label
+              key={value}
+              className={`flex items-center gap-4 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                alertSound === value
+                  ? 'border-orange-500/40 bg-orange-500/8'
+                  : 'border-white/6 bg-gray-800/40 hover:border-white/12'
+              }`}
+            >
+              <input
+                type="radio"
+                name="alertSound"
+                value={value}
+                checked={alertSound === value}
+                onChange={() => setAlertSound(value)}
+                className="sr-only"
+              />
+              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${alertSound === value ? 'border-orange-500' : 'border-gray-600'}`}>
+                {alertSound === value && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-white">{label}</div>
+                <div className="text-xs text-gray-500">{description}</div>
+              </div>
+            </label>
+          ))}
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => playAlertSound(alertSound)}
+            className="flex items-center gap-2 border border-white/10 text-gray-300 hover:text-white hover:border-white/20 px-4 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-[1.02]"
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            Preview Sound
+          </button>
+          <DarkButton onClick={saveAlertSound} disabled={savingSound}>{savingSound ? 'Saving...' : 'Save Sound'}</DarkButton>
+        </div>
+        <StatusMsg msg={soundMsg} />
       </SectionCard>
 
       {/* Subscription */}
@@ -372,17 +389,13 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
               <span className="text-xs text-gray-500">No active plan</span>
             )}
           </div>
-          <p className="text-xs text-gray-500 text-right">Manage billing securely<br />through Stripe</p>
+          <p className="text-xs text-gray-500 text-right">Managed securely<br />through Stripe</p>
         </div>
-        <p className="text-gray-400 text-sm mb-5">
-          Update your payment method, view invoices, and manage your subscription through Stripe's secure billing portal.
-        </p>
+        <p className="text-gray-400 text-sm mb-5">Update your payment method, view invoices, and manage your subscription.</p>
         <div className="flex flex-wrap gap-3">
-          <DarkButton onClick={openBillingPortal} disabled={loadingPortal}>
-            {loadingPortal ? 'Opening...' : 'Manage Billing & Subscription'}
-          </DarkButton>
+          <DarkButton onClick={openBillingPortal} disabled={loadingPortal}>{loadingPortal ? 'Opening...' : 'Manage Billing & Subscription'}</DarkButton>
           {!contractor.stripe_customer_id && (
-            <a href="/onboarding" className="border border-orange-500/30 text-orange-400 hover:bg-orange-500/10 font-semibold px-5 py-2.5 rounded-xl transition-all text-sm">
+            <a href="/onboarding" className="border border-orange-500/30 text-orange-400 hover:bg-orange-500/10 font-semibold px-5 py-2.5 rounded-xl transition-all text-sm hover:scale-[1.02]">
               Upgrade Plan
             </a>
           )}
@@ -401,9 +414,7 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
             <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className={darkInput} placeholder="••••••••" />
           </div>
           <div className="flex justify-end">
-            <DarkButton onClick={changePassword} disabled={savingPass}>
-              {savingPass ? 'Updating...' : 'Update Password'}
-            </DarkButton>
+            <DarkButton onClick={changePassword} disabled={savingPass}>{savingPass ? 'Updating...' : 'Update Password'}</DarkButton>
           </div>
           <StatusMsg msg={passMsg} />
         </div>
@@ -417,11 +428,11 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
         </div>
         <div className="p-6">
           <p className="text-red-300/70 text-sm mb-5">
-            Deleting your account will immediately cancel your subscription and permanently remove all your data. This cannot be undone.
+            Deleting your account will immediately cancel your subscription and remove all your data. This cannot be undone.
           </p>
           <button
             onClick={deleteAccount}
-            className="bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-400 hover:text-red-300 font-semibold px-5 py-2.5 rounded-xl transition-all text-sm"
+            className="border border-red-500/30 text-red-400 hover:bg-red-500/10 font-semibold px-5 py-2.5 rounded-xl transition-all text-sm hover:scale-[1.02]"
           >
             Delete Account
           </button>

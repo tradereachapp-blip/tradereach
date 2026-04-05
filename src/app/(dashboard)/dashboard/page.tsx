@@ -55,6 +55,7 @@ export default async function DashboardPage() {
         zipCodes={contractor.zip_codes}
         isElite={contractor.plan_type === 'elite'}
         initialLeadIds={leads.map(l => l.id)}
+        alertSound={contractor.alert_sound ?? 'siren'}
       />
 
       <div className="mb-6 flex items-center justify-between">

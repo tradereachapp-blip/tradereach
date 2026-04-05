@@ -17,16 +17,21 @@ interface Props {
   zipCodes: string[]
   isElite: boolean
   initialLeadIds: string[]
+  alertSound?: string
+}
+
+// ── Sound engines ──────────────────────────────────────────────────────────────
+function getCtx() {
+  return new (window.AudioContext || (window as any).webkitAudioContext)()
 }
 
 function playSiren() {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const ctx = getCtx()
     function pulse(startTime: number, freq1: number, freq2: number, duration: number) {
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
-      osc.connect(gain)
-      gain.connect(ctx.destination)
+      osc.connect(gain); gain.connect(ctx.destination)
       osc.type = 'sawtooth'
       osc.frequency.setValueAtTime(freq1, startTime)
       osc.frequency.linearRampToValueAtTime(freq2, startTime + duration * 0.5)
@@ -35,23 +40,95 @@ function playSiren() {
       gain.gain.linearRampToValueAtTime(0.18, startTime + 0.05)
       gain.gain.linearRampToValueAtTime(0.18, startTime + duration - 0.05)
       gain.gain.linearRampToValueAtTime(0, startTime + duration)
-      osc.start(startTime)
-      osc.stop(startTime + duration)
+      osc.start(startTime); osc.stop(startTime + duration)
     }
     const t = ctx.currentTime
-    pulse(t,       600, 900, 0.4)
+    pulse(t, 600, 900, 0.4)
     pulse(t + 0.45, 600, 900, 0.4)
-    pulse(t + 0.9,  600, 900, 0.4)
-  } catch { /* user hasn't interacted yet — silent */ }
+    pulse(t + 0.9, 600, 900, 0.4)
+  } catch { /* silent */ }
 }
 
+function playChime() {
+  try {
+    const ctx = getCtx()
+    const freqs = [1047, 1319, 1568]
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain); gain.connect(ctx.destination)
+      osc.type = 'sine'; osc.frequency.value = freq
+      const start = ctx.currentTime + i * 0.12
+      gain.gain.setValueAtTime(0, start)
+      gain.gain.linearRampToValueAtTime(0.2, start + 0.01)
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.6)
+      osc.start(start); osc.stop(start + 0.65)
+    })
+  } catch { /* silent */ }
+}
+
+function playBell() {
+  try {
+    const ctx = getCtx()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain); gain.connect(ctx.destination)
+    osc.type = 'sine'; osc.frequency.value = 880
+    const t = ctx.currentTime
+    gain.gain.setValueAtTime(0, t)
+    gain.gain.linearRampToValueAtTime(0.25, t + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 2.0)
+    osc.start(t); osc.stop(t + 2.1)
+  } catch { /* silent */ }
+}
+
+function playPing() {
+  try {
+    const ctx = getCtx()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain); gain.connect(ctx.destination)
+    osc.type = 'sine'; osc.frequency.value = 1200
+    const t = ctx.currentTime
+    gain.gain.setValueAtTime(0.25, t)
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3)
+    osc.start(t); osc.stop(t + 0.35)
+  } catch { /* silent */ }
+}
+
+function playDing() {
+  try {
+    const ctx = getCtx()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain); gain.connect(ctx.destination)
+    osc.type = 'sine'; osc.frequency.value = 523
+    const t = ctx.currentTime
+    gain.gain.setValueAtTime(0.3, t)
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.8)
+    osc.start(t); osc.stop(t + 0.85)
+  } catch { /* silent */ }
+}
+
+export function playAlertSound(sound: string) {
+  switch (sound) {
+    case 'chime': return playChime()
+    case 'bell': return playBell()
+    case 'ping': return playPing()
+    case 'ding': return playDing()
+    case 'none': return
+    default: return playSiren()
+  }
+}
+
+// ── Component ──────────────────────────────────────────────────────────────────
 const NICHE_ICONS: Record<string, string> = {
   Roofing: '🏠', HVAC: '❄️', Plumbing: '🔧',
   Electrical: '⚡', 'Windows & Doors': '🪟', Painting: '🎨',
 }
 
 export default function LeadAlertSiren({
-  contractorId, niche, zipCodes, isElite, initialLeadIds,
+  contractorId, niche, zipCodes, isElite, initialLeadIds, alertSound = 'siren',
 }: Props) {
   const [newLead, setNewLead] = useState<LeadPreview | null>(null)
   const [visible, setVisible] = useState(false)
@@ -69,15 +146,15 @@ export default function LeadAlertSiren({
     setNewLead(lead)
     setVisible(true)
     setFlash(true)
-    playSiren()
-    // Flash the tab title
+    playAlertSound(alertSound)
+
     let alt = false
     const original = document.title
     const flashTitle = setInterval(() => {
       document.title = alt ? '🚨 NEW LEAD!' : original
       alt = !alt
     }, 600)
-    // Auto-dismiss after 45 seconds
+
     if (dismissTimer.current) clearTimeout(dismissTimer.current)
     dismissTimer.current = setTimeout(() => {
       setVisible(false)
@@ -85,8 +162,9 @@ export default function LeadAlertSiren({
       clearInterval(flashTitle)
       document.title = original
     }, 45000)
+
     return () => clearInterval(flashTitle)
-  }, [])
+  }, [alertSound])
 
   useEffect(() => {
     async function poll() {
@@ -98,13 +176,13 @@ export default function LeadAlertSiren({
           if (!knownIds.current.has(lead.id)) {
             knownIds.current.add(lead.id)
             triggerAlert(lead)
-            break // only alert once per poll cycle
+            break
           }
         }
       } catch { /* ignore */ }
     }
 
-    const interval = setInterval(poll, 20000) // every 20 seconds
+    const interval = setInterval(poll, 20000)
     return () => clearInterval(interval)
   }, [triggerAlert])
 
@@ -112,18 +190,13 @@ export default function LeadAlertSiren({
 
   return (
     <>
-      {/* Flashing red overlay */}
       {flash && (
         <div
           className="fixed inset-0 pointer-events-none z-40"
-          style={{
-            animation: 'sirenFlash 0.5s ease-in-out 6',
-            background: 'rgba(239,68,68,0.12)',
-          }}
+          style={{ animation: 'sirenFlash 0.5s ease-in-out 6', background: 'rgba(239,68,68,0.12)' }}
         />
       )}
 
-      {/* Alert modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={dismiss}>
         <div
           className="relative w-full max-w-md rounded-2xl shadow-2xl border overflow-hidden cursor-default"
@@ -134,7 +207,6 @@ export default function LeadAlertSiren({
           }}
           onClick={e => e.stopPropagation()}
         >
-          {/* Top bar */}
           <div className="bg-red-500 px-5 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-white font-black text-sm uppercase tracking-widest animate-pulse">
@@ -149,7 +221,6 @@ export default function LeadAlertSiren({
             <button onClick={dismiss} className="text-white/70 hover:text-white text-lg leading-none">✕</button>
           </div>
 
-          {/* Content */}
           <div className="p-6">
             <div className="flex items-center gap-4 mb-5">
               <div className="w-14 h-14 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-3xl flex-shrink-0">
@@ -170,7 +241,7 @@ export default function LeadAlertSiren({
 
             <a
               href="/dashboard"
-              className="block w-full text-center bg-red-500 hover:bg-red-600 text-white font-black py-3.5 rounded-xl transition-all text-base shadow-lg shadow-red-500/30"
+              className="block w-full text-center bg-red-500 hover:bg-red-600 text-white font-black py-3.5 rounded-xl transition-all text-base shadow-lg shadow-red-500/30 hover:scale-[1.02]"
               onClick={dismiss}
             >
               Claim This Lead Now →
