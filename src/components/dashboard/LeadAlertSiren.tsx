@@ -20,9 +20,43 @@ interface Props {
   alertSound?: string
 }
 
-// ── Sound engines ──────────────────────────────────────────────────────────────
-function getCtx() {
-  return new (window.AudioContext || (window as any).webkitAudioContext)()
+// Audio context -- singleton to avoid hitting browser limit of 6 contexts
+// Browsers also require a user gesture before audio can play. We resume the
+// context lazily on first user interaction via the module-level listener below.
+let _audioCtx: AudioContext | null = null
+
+function getCtx(): AudioContext {
+  if (!_audioCtx) {
+    _audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+  }
+  // Resume in case the context was auto-suspended (browser autoplay policy)
+  if (_audioCtx.state === 'suspended') {
+    _audioCtx.resume().catch(() => {/* ignore */})
+  }
+  return _audioCtx
+}
+
+// Prime the audio context on the very first user interaction so sounds can
+// play immediately when a lead arrives (without waiting for another click).
+if (typeof window !== 'undefined') {
+  const primeAudio = () => {
+    try {
+      const ctx = getCtx()
+      // Create and immediately stop a silent buffer to unlock the context
+      const buf = ctx.createBuffer(1, 1, 22050)
+      const src = ctx.createBufferSource()
+      src.buffer = buf
+      src.connect(ctx.destination)
+      src.start(0)
+      src.stop(0.001)
+    } catch { /* ignore */ }
+    window.removeEventListener('click', primeAudio)
+    window.removeEventListener('touchstart', primeAudio)
+    window.removeEventListener('keydown', primeAudio)
+  }
+  window.addEventListener('click', primeAudio, { once: true })
+  window.addEventListener('touchstart', primeAudio, { once: true })
+  window.addEventListener('keydown', primeAudio, { once: true })
 }
 
 function playSiren() {
@@ -121,7 +155,6 @@ export function playAlertSound(sound: string) {
   }
 }
 
-// ── Component ──────────────────────────────────────────────────────────────────
 const NICHE_ICONS: Record<string, string> = {
   Roofing: '🏠', HVAC: '❄️', Plumbing: '🔧',
   Electrical: '⚡', 'Windows & Doors': '🪟', Painting: '🎨',

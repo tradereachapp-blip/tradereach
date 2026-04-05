@@ -31,7 +31,7 @@ export function renderLeadNotification(props: LeadNotificationProps): string {
       </table></td></tr>
     </table>
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:16px;">
-      <tr><td align="center">${ctaButton('Claim This Lead &rarr;', claimUrl)}</td></tr>
+      <tr><td align="center">${ctaButton('Claim This Lead Now &rarr;', claimUrl)}</td></tr>
     </table>
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:28px;">
       <tr><td align="center" style="padding:14px 20px;background-color:#fff7ed;border:1px solid #fed7aa;border-radius:6px;">

@@ -7,7 +7,25 @@ import { logError, safeErrorMessage } from '@/lib/utils/error-logger'
 import { createAdminClient } from '@/lib/supabase/server'
 import type { Lead, Contractor } from '@/types'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tradereach.com'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tradereachapp.com'
+
+/**
+ * Normalize any US phone number to E.164 format (+1XXXXXXXXXX).
+ * Accepts: (555) 123-4567 | 555-123-4567 | 5551234567 | +15551234567
+ * Returns null if the number can't be normalized to a valid US number.
+ */
+function toE164(raw: string | null | undefined): string | null {
+  if (!raw) return null
+  // Strip everything except digits and leading +
+  const digits = raw.replace(/\D/g, '')
+  // Handle 10-digit US numbers
+  if (digits.length === 10) return `+1${digits}`
+  // Handle 11-digit numbers starting with 1
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`
+  // Already E.164 with +
+  if (raw.startsWith('+') && digits.length >= 10) return `+${digits}`
+  return null
+}
 
 async function sendSMS(
   to: string,
@@ -17,11 +35,40 @@ async function sendSMS(
 ): Promise<boolean> {
   const supabase = createAdminClient()
 
+  // Pre-flight: verify Twilio is configured
+  if (!TWILIO_FROM) {
+    const msg = 'SMS skipped: TWILIO_PHONE_NUMBER env var is not set. Add it to your Vercel environment variables.'
+    await supabase.from('notifications').insert({
+      contractor_id: contractorId ?? null,
+      lead_id: leadId ?? null,
+      type: 'sms',
+      status: 'failed',
+      error_message: msg,
+    })
+    await logError('sms_config_missing', msg, { contractor_id: contractorId, lead_id: leadId })
+    return false
+  }
+
+  // Pre-flight: validate and normalize phone number to E.164
+  const e164 = toE164(to)
+  if (!e164) {
+    const msg = `SMS skipped: phone number "${to}" could not be converted to E.164 format. Store phone numbers as 10-digit US numbers.`
+    await supabase.from('notifications').insert({
+      contractor_id: contractorId ?? null,
+      lead_id: leadId ?? null,
+      type: 'sms',
+      status: 'failed',
+      error_message: msg,
+    })
+    await logError('sms_invalid_phone', msg, { to, contractor_id: contractorId, lead_id: leadId })
+    return false
+  }
+
   try {
     await twilioClient.messages.create({
       body,
       from: TWILIO_FROM,
-      to,
+      to: e164,
     })
 
     // Log success
@@ -82,7 +129,7 @@ export async function sendLeadAlertSMS(
   const body =
     `TradeReach: New ${lead.niche} lead in ${lead.zip}. ` +
     `${firstName} needs a quote. ` +
-    `Claim now: ${APP_URL}/dashboard`
+    `Claim now: ${APP_URL}/dashboard?tab=available-leads`
 
   // Use dedicated SMS notification number if set, otherwise fall back to business phone
   const toPhone = contractor.sms_notification_phone || contractor.phone
