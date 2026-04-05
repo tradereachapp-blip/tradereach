@@ -157,7 +157,7 @@ function useCountUp(target: number, duration = 1500, start = false) {
 
 // ─── FAQ Accordion ──────────────────────────────────────────────────────────
 function FaqAccordion({ faqs }: { faqs: { q: string; a: string }[] }) {
-  const [open, setOpen] = useState<number | null>(null)
+  const [open, setOpen] = useState(null as number | null)
   return (
     <div className="space-y-2">
       {faqs.map((faq, i) => (
@@ -256,7 +256,7 @@ function SectionDivider() {
 
 // ─── Stats bar ──────────────────────────────────────────────────────────────
 function StatsBar() {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef(null as HTMLDivElement | null)
   const [triggered, setTriggered] = useState(false)
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setTriggered(true) }, { threshold: 0.3 })
@@ -617,7 +617,7 @@ export default function ContractorsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
                   { num: '01', title: 'Homeowner requests a quote', desc: 'A real homeowner fills out our form and tells us exactly what service they need and when they want to be called.' },
-     0            { num: '02', title: 'We match them to you', desc: "We instantly find licensed contractors in their ZIP who specialize in that niche. You're notified within seconds." },
+                  { num: '02', title: 'We match them to you', desc: "We instantly find licensed contractors in their ZIP who specialize in that niche. You're notified within seconds." },
                   { num: '03', title: 'You claim the lead and close', desc: 'You get SMS + email with lead details. Log in, claim it before another contractor, then call and close.' },
                 ].map((s, i) => (
                   <div key={i} className="glass-card" style={{
