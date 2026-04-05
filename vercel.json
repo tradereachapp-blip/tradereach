@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/monitor",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 7 * * *"
     },
     {
       "path": "/api/cron/daily-report",
@@ -14,7 +14,7 @@
     },
     {
       "path": "/api/cron/notify-queue",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 8 * * *"
     }
   ]
 }
