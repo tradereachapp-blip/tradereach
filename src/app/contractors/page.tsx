@@ -617,14 +617,14 @@ export default function ContractorsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
                   { num: '01', title: 'Homeowner requests a quote', desc: 'A real homeowner fills out our form and tells us exactly what service they need and when they want to be called.' },
-                  { num: '02', title: 'We match them to you', desc: "We instantly find licensed contractors in their ZIP who specialize in that niche. You're notified within seconds." },
+     0            { num: '02', title: 'We match them to you', desc: "We instantly find licensed contractors in their ZIP who specialize in that niche. You're notified within seconds." },
                   { num: '03', title: 'You claim the lead and close', desc: 'You get SMS + email with lead details. Log in, claim it before another contractor, then call and close.' },
                 ].map((s, i) => (
                   <div key={i} className="glass-card" style={{
                     borderRadius: 20, padding: '32px 28px',
                     position: 'relative', overflow: 'hidden',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                    zI.ndex: 1,
+                    zIndex: 1,
                   }}>
                     {/* Top glow line */}
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, rgba(249,115,22,0.8), transparent)', boxShadow: '0 0 12px rgba(249,115,22,0.4)' }} />
@@ -641,7 +641,7 @@ export default function ContractorsPage() {
                       background: 'rgba(249,115,22,0.15)',
                       marginBottom: 16,
                     }}>
-                      <span style={{ fontFamily: "'Bebas Neue',impact,sans-serif", fontSize: 18, color: '#f97316' }}>
+                      <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 18, color: '#f97316' }}>
                         {['●', '◆', '★'][i]}
                       </span>
                     </div>
@@ -657,14 +657,24 @@ export default function ContractorsPage() {
 
         <SectionDivider />
 
-        {/* Pricing */}
-        <div id="pricing">
-          <PricingSection foundingSpots={foundingSpots} />
+        {/* ── Pricing ──────────────────────────────────────────────────────── */}
+        <div id="pricing" style={{
+          background: 'linear-gradient(180deg, rgb(8,18,34) 0%, rgb(12,24,44) 100%)',
+          position: 'relative',
+        }}>
+          {/* Diagonal stripe bg */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 60px)',
+          }} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <PricingSection foundingSpots={foundingSpots} />
+          </div>
         </div>
 
         <SectionDivider />
 
-        {/* Comparison table */}
+        {/* ── Comparison table ─────────────────────────────────────────────── */}
         <section style={{ padding: 'clamp(64px,8vw,96px) 16px', background: 'rgb(10,22,40)' }}>
           <div style={{ maxWidth: 800, margin: '0 auto' }}>
             <h2 style={{ fontFamily: "'Bebas Neue',impact,sans-serif", fontSize: 'clamp(28px,4vw,48px)', textAlign: 'center', marginBottom: 8, color: '#fff', letterSpacing: '0.5px' }}>
@@ -681,11 +691,14 @@ export default function ContractorsPage() {
 
         <SectionDivider />
 
-        {/* FAQ */}
-        <section style={{ padding: 'clamp(64px,8vw,96px) 16px', position: 'relative' }}>
+        {/* ── FAQ ──────────────────────────────────────────────────────────── */}
+        <section style={{
+          padding: 'clamp(64px,8vw,96px) 16px',
+          position: 'relative',
+        }}>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(249,115,22,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
           <div style={{ maxWidth: 720, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-            <h2 style={{ fontFamily: "'Bebas Neue',impact,sans-serif", fontSize: 'clamp(28px,4vw,32px)', textAlign: 'center', marginBottom: 40, color: '#fff', letterSpacing: '0.5px' }}>
+            <h2 style={{ fontFamily: "'Bebas Neue',impact,sans-serif", fontSize: 'clamp(28px,4vw,48px)', textAlign: 'center', marginBottom: 40, color: '#fff', letterSpacing: '0.5px' }}>
               Frequently Asked Questions
             </h2>
             <FaqAccordion faqs={faqs} />
@@ -694,21 +707,29 @@ export default function ContractorsPage() {
 
         <SectionDivider />
 
-        {/* CTA */}
+        {/* ── CTA ──────────────────────────────────────────────────────────── */}
         <section style={{
           padding: 'clamp(80px,10vw,120px) 16px',
           textAlign: 'center',
           background: 'linear-gradient(180deg, rgb(15,30,55) 0%, rgb(20,40,70) 50%, rgb(10,22,40) 100%)',
-          position: 'relative', overflow: 'hidden',
+          position: 'relative',
+          overflow: 'hidden',
         }}>
+          {/* CTA center glow */}
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 60%, rgba(249,115,22,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          {/* Particles */}
           <Particles count={20} />
+
           <div style={{ position: 'relative', zIndex: 1 }}>
+            {/* Testimonials */}
             <TestimonialCards />
+
+            {/* Headline */}
             <h2 style={{
               fontFamily: "'Bebas Neue',impact,sans-serif",
               fontSize: 'clamp(48px,7vw,80px)',
-              letterSpacing: '0.5px', marginBottom: 20, lineHeight: 0.95,
+              letterSpacing: '0.5px',
+              marginBottom: 20, lineHeight: 0.95,
             }}>
               Ready to fill your{' '}
               <span style={{ color: '#f97316', textShadow: '0 0 40px rgba(249,115,22,0.4)' }}>pipeline?</span>
@@ -716,10 +737,14 @@ export default function ContractorsPage() {
             <p style={{ color: '#64748b', fontSize: 17, marginBottom: 40, fontFamily: "'DM Sans',sans-serif" }}>
               Your first 7 days are free. No credit card required.
             </p>
+
+            {/* Big CTA button */}
             <a href="/signup" className="cta-btn-primary" style={{
-              display: 'inline-block', color: '#fff', textDecoration: 'none', fontWeight: 700,
+              display: 'inline-block',
+              color: '#fff', textDecoration: 'none', fontWeight: 700,
               fontSize: 18, padding: '18px 0', borderRadius: 14,
-              width: 'min(600px, 100%)', letterSpacing: '0.01em',
+              width: 'min(600px, 100%)',
+              letterSpacing: '0.01em',
             }}>
               Start Your Free 7-Day Trial — No Credit Card Required
             </a>
