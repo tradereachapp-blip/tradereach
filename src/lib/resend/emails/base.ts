@@ -1,5 +1,5 @@
 // ============================================================
-// TradeReach Email Base â Shared layout primitives
+// TradeReach Email Base — Shared layout primitives
 // All emails are rendered as inline-CSS HTML strings for
 // maximum compatibility across Gmail, Outlook, Apple Mail,
 // and mobile clients.
@@ -23,7 +23,7 @@ export const BRAND = {
   address: 'TradeReach &bull; Vacaville, CA 95688',
 }
 
-/** Bulletproof HTML wrapper â doctype + full meta */
+/** Bulletproof HTML wrapper — doctype + full meta */
 export function htmlWrapper(bodyContent: string): string {
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -57,17 +57,20 @@ export function htmlWrapper(bodyContent: string): string {
 </html>`
 }
 
-/** Navy header with TradeReach wordmark */
+/** Navy header with TradeReach logo badge */
 export function emailHeader(subtitle?: string): string {
   return `<tr>
     <td style="background-color:${BRAND.navy};border-radius:8px 8px 0 0;padding:28px 40px;text-align:center;">
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
         <tr>
           <td style="text-align:center;">
-            <div style="display:inline-block;">
-              <span style="font-family:${BRAND.fontStack};font-size:26px;font-weight:800;color:${BRAND.orange};letter-spacing:-0.5px;">Trade</span><span style="font-family:${BRAND.fontStack};font-size:26px;font-weight:800;color:${BRAND.white};letter-spacing:-0.5px;">Reach</span>
-            </div>
-            ${subtitle ? `<p style="margin:6px 0 0;font-size:12px;color:#94a3b8;letter-spacing:0.08em;text-transform:uppercase;font-family:${BRAND.fontStack};">${subtitle}</p>` : ''}
+            <img src="https://tradereachapp.com/logo.png"
+                 alt="TradeReach™"
+                 width="64"
+                 height="64"
+                 style="display:inline-block;width:64px;height:64px;border:0;outline:none;text-decoration:none;"
+            />
+            ${subtitle ? `<p style="margin:8px 0 0;font-size:12px;color:#94a3b8;letter-spacing:0.08em;text-transform:uppercase;font-family:${BRAND.fontStack};">${subtitle}</p>` : ''}
           </td>
         </tr>
       </table>
