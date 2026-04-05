@@ -17,13 +17,37 @@ export default async function DashboardLayout({
   }
 
   const admin = createAdminClient()
-  const { data: contractor } = await admin
+
+  // Try to resolve contractor for this user.
+  // Owners: direct match. Team members: resolve via team_members table.
+  let contractor = null
+
+  const { data: ownerContractor } = await admin
     .from('contractors')
     .select('*')
     .eq('user_id', user.id)
     .single()
 
-  const contractorFirstName = contractor?.contact_name?.split(' ')[0] ?? null
+  if (ownerContractor) {
+    contractor = ownerContractor
+  } else {
+    // Check if this user is an active team member
+    const { data: membership } = await admin
+      .from('team_members')
+      .select('owner_contractor_id')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .single()
+
+    if (membership) {
+      const { data: ownerC } = await admin
+        .from('contractors')
+        .select('*')
+        .eq('id', membership.owner_contractor_id)
+        .single()
+      contractor = ownerC
+    }
+  }
 
   return (
     <RexProvider>

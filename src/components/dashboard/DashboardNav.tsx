@@ -84,6 +84,7 @@ export default function DashboardNav({ contractor, userEmail }: Props) {
     { href: '/dashboard', label: 'Available Leads' },
     { href: '/dashboard/claimed', label: 'Claimed Leads' },
     { href: '/dashboard/notifications', label: 'Notifications' },
+    { href: '/dashboard/team', label: 'Team' },
   ]
 
   return (
