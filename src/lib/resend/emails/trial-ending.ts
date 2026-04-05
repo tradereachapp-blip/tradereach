@@ -1,6 +1,6 @@
 // ============================================================
-// Email 3 â Trial Ending in 24 Hours
-// Subject: Your Free Trial Ends Tomorrow â Don't Lose Your Leads
+// Email 3 – Trial Ending in 24 Hours
+// Subject: Your Free Trial Ends Tomorrow – Don't Lose Your Leads
 // ============================================================
 
 import { htmlWrapper, emailHeader, emailBody, contractorFooter, ctaButton, BRAND } from './base'
@@ -21,7 +21,7 @@ export function renderTrialEnding(props: TrialEndingProps): string {
       <tr>
         <td style="background-color:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:14px 18px;text-align:center;">
           <p style="margin:0;font-size:14px;font-weight:700;color:#991b1b;font-family:${BRAND.fontStack};">
-            &#9888;&#65039; Your 7-day free trial ends tomorrow
+            ⚠️ Your 7-day free trial ends tomorrow
           </p>
         </td>
       </tr>
@@ -46,9 +46,9 @@ export function renderTrialEnding(props: TrialEndingProps): string {
               <td style="background-color:${BRAND.gray50};border:1px solid ${BRAND.gray200};border-radius:8px;padding:20px;">
                 <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${BRAND.gray500};text-transform:uppercase;letter-spacing:0.06em;font-family:${BRAND.fontStack};">Pro</p>
                 <p style="margin:0 0 12px;font-size:26px;font-weight:800;color:${BRAND.navy};font-family:${BRAND.fontStack};">$${proPriceMonthly}<span style="font-size:13px;font-weight:400;color:${BRAND.gray500};">/mo</span></p>
-                <p style="margin:0 0 6px;font-size:13px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">&#10003; Up to 10 leads/month</p>
-                <p style="margin:0 0 6px;font-size:13px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">&#10003; SMS + email alerts</p>
-                <p style="margin:0;font-size:13px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">&#10003; 5 ZIP codes</p>
+                <p style="margin:0 0 6px;font-size:13px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">✓ Up to 10 leads/month</p>
+                <p style="margin:0 0 6px;font-size:13px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">✓ SMS + email alerts</p>
+                <p style="margin:0;font-size:13px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">✓ 5 ZIP codes</p>
               </td>
             </tr>
           </table>
@@ -58,11 +58,11 @@ export function renderTrialEnding(props: TrialEndingProps): string {
           <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
             <tr>
               <td style="background-color:${BRAND.navy};border:2px solid ${BRAND.orange};border-radius:8px;padding:20px;">
-                <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${BRAND.orange};text-transform:uppercase;letter-spacing:0.06em;font-family:${BRAND.fontStack};">Elite &#11088;</p>
+                <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${BRAND.orange};text-transform:uppercase;letter-spacing:0.06em;font-family:${BRAND.fontStack};">Elite ⭐</p>
                 <p style="margin:0 0 12px;font-size:26px;font-weight:800;color:${BRAND.white};font-family:${BRAND.fontStack};">$${elitePriceMonthly}<span style="font-size:13px;font-weight:400;color:#94a3b8;">/mo</span></p>
-                <p style="margin:0 0 6px;font-size:13px;color:#e2e8f0;font-family:${BRAND.fontStack};">&#10003; Unlimited leads</p>
-                <p style="margin:0 0 6px;font-size:13px;color:#e2e8f0;font-family:${BRAND.fontStack};">&#10003; Priority 15-min window</p>
-                <p style="margin:0;font-size:13px;color:#e2e8f0;font-family:${BRAND.fontStack};">&#10003; Unlimited ZIP codes</p>
+                <p style="margin:0 0 6px;font-size:13px;color:#e2e8f0;font-family:${BRAND.fontStack};">✓ Unlimited leads</p>
+                <p style="margin:0 0 6px;font-size:13px;color:#e2e8f0;font-family:${BRAND.fontStack};">✓ Priority 15-min window</p>
+                <p style="margin:0;font-size:13px;color:#e2e8f0;font-family:${BRAND.fontStack};">✓ Unlimited ZIP codes</p>
               </td>
             </tr>
           </table>
@@ -74,7 +74,7 @@ export function renderTrialEnding(props: TrialEndingProps): string {
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:20px;">
       <tr>
         <td align="center">
-          ${ctaButton('Activate My Plan &rarr;', activateUrl)}
+          ${ctaButton('Activate My Plan →', activateUrl)}
         </td>
       </tr>
     </table>

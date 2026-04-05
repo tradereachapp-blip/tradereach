@@ -1,18 +1,18 @@
-// ===========================================================
+// ============================================================
 // TradeReach — All Transactional Email Senders
 //
 // From addresses per email type:
-//   Lead notifications      -> notifications@tradereachapp.com
-//   Welcome                  -> welcome@tradereachapp.com
-//   Trial ending             -> notifications@tradereachapp.com
-//   Payment failed           -> billing@tradereachapp.com
-//   Monthly performance      -> notifications@tradereachapp.com
-//   Homeowner confirmation   -> noreply@tradereachapp.com
-//   Cancellation             -> notifications@tradereachapp.com
-//   Admin alerts             -> alerts@tradereachapp.com
-//   Morning digest           -> notifications@tradereachapp.com
+//   Lead notifications      → notifications@tradereachapp.com
+//   Welcome                 → welcome@tradereachapp.com
+//   Trial ending            → notifications@tradereachapp.com
+//   Payment failed          → billing@tradereachapp.com
+//   Monthly performance     → notifications@tradereachapp.com
+//   Homeowner confirmation  → noreply@tradereachapp.com
+//   Cancellation            → notifications@tradereachapp.com
+//   Admin alerts            → alerts@tradereachapp.com
+//   Morning digest          → notifications@tradereachapp.com
 //
-// Reply-to on all contractor-facing emails -> support@tradereachapp.com
+// Reply-to on all contractor-facing emails → support@tradereachapp.com
 // ============================================================
 
 import { resend, ADMIN_EMAIL } from './client'
@@ -41,43 +41,209 @@ const FROM = {
   alerts:        process.env.RESEND_FROM_ALERTS        ?? 'alerts@tradereachapp.com',
 }
 
-const SUPPORT_EMAIL = process.env.RESEND_SUPPORT_EMAIL ?? 'support@tradereachapp.com'
+const SUPPORT_EMAIL = 'support@tradereachapp.com'
 
-function sender(address, name = 'TradeReach') {
-  return name + ' <' + address + '>'
-}
-
-export async function sendLeadNotificationEmail(email, contractor, lead) {
-  const firstName = lead.name.split(' ')[0]
+// ================================================================
+// 1. Welcome Email
+// ================================================================
+export async function sendWelcome(contractor: Contractor): Promise<void> {
   try {
-    await resend.emails.send({ from: sender(FROM.notifications, 'TradeReach Leads'), to: email, replyTo: SUPPORT_EMAIL, subject: 'New ' + lead.niche + ' Lead in ' + lead.zip + ' — Claim Now', html: renderLeadNotification({ contractorName: contractor.contact_name ?? contractor.business_name ?? 'there', serviceType: lead.niche, zip: lead.zip, homeownerFirstName: firstName, callbackPreference: lead.callback_time ?? 'Anytime', claimUrl: APP_URL + '/dashboard?tab=available-leads', isElite: contractor.plan_type === 'elite' }) })
-  } catch (err) { throw err }
-}
-
-export async function sendContractorWelcome(email, contractor) {
-  const firstName = (contractor.contact_name ?? contractor.business_name ?? 'there').split(' ')[0]
-  try { await resend.emails.send({ from: sender(FROM.welcome, 'TradeReach'), to: email, replyTo: SUPPORT_EMAIL, subject: 'Welcome to TradeReach — You\'re Almost Live', html: renderWelcome({ firstName, setupUrl: APP_URL + '/onboarding', niche: contractor.niche }) }) } catch (err) { await logError('email_contractor_welcome', safeErrorMessage(err), { contractor_id: contractor.id }) }
-}
-
-export async function sendTeamInvitation(
-  email: string,
-  recipientName: string,
-  inviterName: string,
-  token: string,
-  businessName: string
-) {
-  const acceptUrl = `${APP_URL}/accept-invite?token=${token}`
-  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;"><tr><td style="padding:32px 40px;border-bottom:1px solid rgba(255,255,255,0.06);"><span style="font-size:20px;font-weight:900;color:#fff;letter-spacing:-0.5px;">Trade<span style="color:#f97316;">Reach</span></span></td></tr><tr><td style="padding:40px;"><h1 style="margin:0 0 8px;font-size:24px;font-weight:900;color:#fff;">You've been invited</h1><p style="margin:0 0 24px;font-size:15px;color:#888;">${inviterName} from <strong style="color:#fff;">${businessName}</strong> has invited you to join their TradeReach team as <strong style="color:#fff;">${recipientName}</strong>.</p><p style="margin:0 0 8px;font-size:14px;color:#888;">As a team member, you'll have access to:</p><ul style="margin:0 0 28px;padding-left:20px;color:#888;font-size:14px;line-height:1.8;"><li>Live lead alerts for your service area</li><li>The shared leads dashboard</li><li>Claim and track leads directly</li></ul><a href="${acceptUrl}" style="display:inline-block;background:#f97316;color:#fff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 28px;border-radius:10px;">Accept Invitation &#10674;</a><p style="margin:24px 0 0;font-size:12px;color:#555;">This invitation expires in 7 days. If you didn't expect this, you can ignore it.</p></td></tr><tr><td style="padding:20px 40px;border-top:1px solid rgba(255,255,255,0.06);"><p style="margin:0;font-size:12px;color:#555;">TradeReach &#8212; Connecting contractors with homeowners &#183; <a href="${APP_URL}" style="color:#f97316;text-decoration:none;">tradereachapp.com</a></p></td></tr></table></td></tr></table></body></html>`
-
-  try {
+    const { firstName } = getNames(contractor)
+    const html = renderWelcome({ firstName, dashboardUrl: `${APP_URL}/dashboard` })
     await resend.emails.send({
-      from: sender(FROM.welcome, 'TradeReach'),
-      to: email,
+      from: FROM.welcome,
+      to: contractor.user_email,
       replyTo: SUPPORT_EMAIL,
-      subject: `${inviterName} invited you to join their TradeReach team`,
+      subject: 'Welcome to TradeReach',
       html,
     })
-  } catch (err) {
-    await logError('email_team_invitation', safeErrorMessage(err), { email })
+  } catch (err: unknown) {
+    const msg = safeErrorMessage(err)
+    await logError('email_welcome_failed', `Failed to send welcome email to ${contractor.user_email}: ${msg}`, { contractor_id: contractor.id })
   }
+}
+
+// ================================================================
+// 2. Lead Notification Email
+// ================================================================
+export async function sendLeadNotification(
+  contractor: Contractor,
+  lead: Lead
+): Promise<void> {
+  try {
+    const recipientEmail = contractor.notification_email || contractor.user_email
+    const { firstName } = getNames(contractor)
+    const leadUrl = `${APP_URL}/dashboard?lead_id=${lead.id}`    const html = renderLeadNotification({
+      firstName,
+      homeownerName: lead.name,
+      niche: lead.niche,
+      zip: lead.zip,
+      callbackPreference: lead.callback_time,
+      claimUrl: leadUrl,
+    })
+    await resend.emails.send({
+      from: FROM.notifications,
+      to: recipientEmail,
+      replyTo: SUPPORT_EMAIL,
+      subject: `New ${lead.niche} Lead in ${lead.zip}`,
+      html,
+    })
+  } catch (err: unknown) {
+    const msg = safeErrorMessage(err)
+    await logError('email_lead_notification_failed', `Failed to send lead notification to ${contractor.user_email}: ${msg}`, {
+      contractor_id: contractor.id,
+      lead_id: lead.id,
+    })
+  }
+}
+
+// ================================================================
+// 3. Trial Ending in 24 Hours
+// ================================================================
+export async function sendTrialEnding(contractor: Contractor): Promise<void> {
+  try {
+    const { firstName } = getNames(contractor)
+    const html = renderTrialEnding({
+      firstName,
+      activateUrl: `${APP_URL}/onboarding`,
+      proPriceMonthly: PRICING.pro.monthly,
+      elitePriceMonthly: PRICING.elite.monthly,
+    })
+    await resend.emails.send({
+      from: FROM.notifications,
+      to: contractor.user_email,
+      replyTo: SUPPORT_EMAIL,
+      subject: 'Your Free Trial Ends Tomorrow — Don\'t Lose Your Leads',
+      html,
+    })
+  } catch (err: unknown) {
+    const msg = safeErrorMessage(err)
+    await logError('email_trial_ending_failed', `Failed to send trial ending email to ${contractor.user_email}: ${msg}`, { contractor_id: contractor.id })
+  }
+}
+
+// ================================================================
+// 4. Payment Failed
+// ================================================================
+export async function sendPaymentFailed(contractor: Contractor): Promise<void> {
+  try {
+    const { firstName } = getNames(contractor)
+    const billingUrl = `${APP_URL}/settings`
+    const html = renderPaymentFailed({ firstName, billingUrl })
+    await resend.emails.send({
+      from: FROM.billing,
+      to: contractor.user_email,
+      replyTo: SUPPORT_EMAIL,
+      subject: 'Action Required — Update Your Billing to Keep Receiving Leads',
+      html,
+    })
+  } catch (err: unknown) {
+    const msg = safeErrorMessage(err)
+    await logError('email_payment_failed_failed', `Failed to send payment failed email to ${contractor.user_email}: ${msg}`, { contractor_id: contractor.id })
+  }
+}
+
+// ================================================================
+// 5. Monthly Performance Report
+// ================================================================
+export async function sendMonthlyPerformance(
+  contractor: Contractor,
+  stats: {
+    leadsReceived: number
+    leadsClaimed: number
+    responseRate: string
+    estimatedRevenue: string
+    month: string
+  }
+): Promise<void> {
+  try {
+    const { firstName } = getNames(contractor)
+    const recipientEmail = contractor.notification_email || contractor.user_email
+    const html = renderMonthlyPerformance({
+      firstName,
+      month: stats.month,
+      leadsReceived: stats.leadsReceived,
+      leadsClaimed: stats.leadsClaimed,
+      responseRate: stats.responseRate,
+      estimatedRevenue: stats.estimatedRevenue,
+      dashboardUrl: `${APP_URL}/dashboard`,
+    })
+    await resend.emails.send({
+      from: FROM.notifications,
+      to: recipientEmail,
+      replyTo: SUPPORT_EMAIL,
+      subject: `Your TradeReach Report — ${stats.month}`,
+      html,
+    })
+  } catch (err: unknown) {
+    const msg = safeErrorMessage(err)
+    await logError('email_monthly_perf_failed', `Failed to send monthly performance email to ${contractor.user_email}: ${msg}`, { contractor_id: contractor.id })
+  }
+}
+
+// ================================================================
+// 6. Homeowner Quote Confirmation (No Brand Name In Body)
+// ================================================================
+export async function sendHomeownerConfirmation(
+  recipientPhone: string,
+  lead: Lead,
+  supportPhone?: string
+): Promise<void> {
+  try {
+    const { firstName } = getNames(lead)
+    const html = renderHomeownerConfirmation({
+      firstName,
+      serviceType: lead.niche,
+      zip: lead.zip,
+      callbackPreference: lead.callback_time || 'Not specified',
+      supportPhone,
+    })
+
+    // Homeowner emails go to the lead's email if available, fallback to contractor support email for now
+    // In production, extract lead.email from lead data
+    const recipientEmail = (lead as any).email || ADMIN_EMAIL
+
+    await resend.emails.send({
+      from: FROM.noreply,
+      to: recipientEmail,
+      subject: 'Your Quote Request Was Received',
+      html,
+    })
+  } catch (err: unknown) {
+    const msg = safeErrorMessage(err)
+    await logError('email_homeowner_confirm_failed', `Failed to send homeowner confirmation: ${msg}`, { lead_id: lead.id })
+  }
+}
+
+// ================================================================
+// 7. Subscription Cancellation
+// ================================================================
+export async function sendCancellation(
+  contractor: Contractor,
+  accessEndsDate: string
+): Promise<void> {
+  try {
+    const { firstName } = getNames(contractor)
+    const reactivateUrl = `${APP_URL}/onboarding`
+    const html = renderCancellation({ firstName, accessEndsDate, reactivateUrl })
+    await resend.emails.send({
+      from: FROM.notifications,
+      to: contractor.user_email,
+      replyTo: SUPPORT_EMAIL,
+      subject: 'Your TradeReach Subscription Has Been Cancelled',
+      html,
+    })
+  } catch (err: unknown) {
+    const msg = safeErrorMessage(err)
+    await logError('email_cancellation_failed', `Failed to send cancellation email to ${contractor.user_email}: ${msg}`, { contractor_id: contractor.id })
+  }
+}
+
+// ================================================================
+// Helper: Extract Name
+// ================================================================
+function getNames(obj: any): { firstName: string; lastName?: string } {
+  const name = obj.contact_name || obj.name || 'there'
+  const [firstName, ...rest] = name.split(' ')
+  return { firstName: firstName || 'Friend', lastName: rest.join(' ') || undefined }
 }

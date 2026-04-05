@@ -5,7 +5,10 @@ import Image from 'next/image'
 interface LogoBadgeProps {
   className?: string
   footer?: boolean
+  /** 'dark' = logo on dark backgrounds (default)
+   *  'light' = logo on light backgrounds */
   variant?: 'dark' | 'light'
+  /** Override link destination — defaults to "/" */
   href?: string
 }
 
@@ -18,7 +21,9 @@ export default function LogoBadge({
   return (
     <a
       href={href}
-      className={`logo-badge-wrap inline-flex items-center select-none group ${footer ? 'opacity-70 hover:opacity-100' : ''}`}
+      className={`logo-badge-wrap inline-flex items-center select-none group ${
+        footer ? 'opacity-70 hover:opacity-100' : ''
+      }`}
       style={{ textDecoration: 'none' }}
     >
       <Image

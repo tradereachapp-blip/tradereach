@@ -1,6 +1,6 @@
 // ============================================================
-// Email 4 â Payment Failed
-// Subject: Action Required â Update Your Billing to Keep Receiving Leads
+// Email 4 – Payment Failed
+// Subject: Action Required – Update Your Billing to Keep Receiving Leads
 // ============================================================
 
 import { htmlWrapper, emailHeader, emailBody, contractorFooter, ctaButton, BRAND } from './base'
@@ -19,14 +19,14 @@ export function renderPaymentFailed(props: PaymentFailedProps): string {
       <tr>
         <td style="background-color:#fef2f2;border:1px solid #fecaca;border-left:4px solid ${BRAND.red};border-radius:6px;padding:16px 20px;">
           <p style="margin:0;font-size:15px;font-weight:700;color:#991b1b;font-family:${BRAND.fontStack};">
-            &#10060; &nbsp;Action Required: Payment not processed
+            ✕ &nbsp;Action Required: Payment not processed
           </p>
         </td>
       </tr>
     </table>
 
     <!-- Headline -->
-    <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:${BRAND.navy};font-family:${BRAND.fontStack};line-height:1.2;">Your payment didn&rsquo;t go through.</h1>
+    <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:${BRAND.navy};font-family:${BRAND.fontStack};line-height:1.2;">Your payment didn't go through.</h1>
     <p style="margin:0 0 12px;font-size:15px;color:${BRAND.gray700};font-family:${BRAND.fontStack};line-height:1.7;">
       Hi ${firstName}, we were unable to process your subscription payment.
     </p>
@@ -39,9 +39,9 @@ export function renderPaymentFailed(props: PaymentFailedProps): string {
       <tr>
         <td style="padding:20px 24px;">
           <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:${BRAND.gray900};text-transform:uppercase;letter-spacing:0.06em;font-family:${BRAND.fontStack};">What is paused</p>
-          <p style="margin:0 0 8px;font-size:14px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">&#8212; &nbsp;SMS lead alerts</p>
-          <p style="margin:0 0 8px;font-size:14px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">&#8212; &nbsp;Email lead notifications</p>
-          <p style="margin:0;font-size:14px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">&#8212; &nbsp;Access to new leads in your dashboard</p>
+          <p style="margin:0 0 8px;font-size:14px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">— &nbsp;SMS lead alerts</p>
+          <p style="margin:0 0 8px;font-size:14px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">— &nbsp;Email lead notifications</p>
+          <p style="margin:0;font-size:14px;color:${BRAND.gray700};font-family:${BRAND.fontStack};">— &nbsp;Access to new leads in your dashboard</p>
         </td>
       </tr>
     </table>
@@ -50,7 +50,7 @@ export function renderPaymentFailed(props: PaymentFailedProps): string {
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:24px;">
       <tr>
         <td align="center">
-          ${ctaButton('Update Billing &rarr;', billingUrl)}
+          ${ctaButton('Update Billing →', billingUrl)}
         </td>
       </tr>
     </table>

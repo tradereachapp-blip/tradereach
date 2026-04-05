@@ -1,222 +1,175 @@
 import { NextRequest } from 'next/server'
-import { stripe } from '@/lib/stripe/client'
 import { createAdminClient } from '@/lib/supabase/server'
-import { logError, safeErrorMessage } from '@/lib/utils/error-logger'
-import { sendPaymentFailedEmail, sendCancellationEmail } from '@/lib/resend/templates'
-import { sendPaymentFailedSMS } from '@/lib/twilio/sms'
-import type Stripe from 'stripe'
+import { logError, structuredError } from '@/lib/utils/error-logger'
+import { stripe } from '@/lib/stripe/client'
+import { sendMonthlyCreditsGrantedEmail, sendUpgradeConfirmationEmail, sendZipTerritoryChangeNotification, sendWinBackEmail, sendAccountManagerWelcomeEmail } from '@/lib/resend/templates'
+import { getMonthlyCredits } from '@/lib/pricing'
+import { recordZipClaim } from '@/lib/utils/zip-claims'
 
-// IMPORTANT: Stripe needs the raw body for signature verification — read via request.text()
 export async function POST(request: NextRequest) {
-  const body = await request.text()
-  const sig = request.headers.get('stripe-signature')
-
-  if (!sig) {
-    return Response.json({ error: 'No signature' }, { status: 400 })
-  }
-
-  let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    )
-  } catch (err) {
-    await logError('webhook_signature_invalid', safeErrorMessage(err))
-    return Response.json({ error: 'Invalid signature' }, { status: 400 })
-  }
+    const body = await request.text()
+    const sig = request.headers.get('stripe-signature')
 
-  const admin = createAdminClient()
+    if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) {
+      return structuredError('Missing signature or secret', 401)
+    }
 
-  try {
+    let event
+    try {
+      event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET)
+    } catch (err) {
+      await logError('stripe_webhook_sig_error', String(err))
+      return structuredError('Webhook signature verification failed', 401)
+    }
+
+    const admin = createAdminClient()
+
     switch (event.type) {
-      // -------------------------------------------------------
       case 'customer.subscription.created': {
-        const sub = event.data.object as Stripe.Subscription
-        const contractorId = sub.metadata?.contractor_id
-        const planType = sub.metadata?.plan_type as 'pro' | 'elite'
-
-        if (!contractorId || !planType) break
-
-        // Always check DB state before updating (handle out-of-order events)
+        const subscription = event.data.object as any
         const { data: contractor } = await admin
-          .from('contractors').select('*').eq('id', contractorId).single()
-        if (!contractor) break
+          .from('contractors')
+          .select('id, user_id, plan_type, zip_codes, niche')
+          .eq('stripe_subscription_id', subscription.id)
+          .single()
 
-        await admin.from('contractors').update({
-          plan_type: planType,
-          subscription_status: sub.status === 'trialing' ? 'trialing' : 'active',
-          stripe_subscription_id: sub.id,
-          leads_reset_at: new Date(sub.current_period_start * 1000).toISOString(),
-        }).eq('id', contractorId)
-
-        break
-      }
-
-      // -------------------------------------------------------
-      case 'customer.subscription.updated': {
-        const sub = event.data.object as Stripe.Subscription
-        const contractorId = sub.metadata?.contractor_id
-        const planType = sub.metadata?.plan_type as 'pro' | 'elite'
-
-        if (!contractorId) break
-
-        let status: string
-        switch (sub.status) {
-          case 'trialing': status = 'trialing'; break
-          case 'active': status = 'active'; break
-          case 'past_due': status = 'past_due'; break
-          case 'canceled': status = 'canceled'; break
-          case 'unpaid': status = 'past_due'; break
-          default: status = 'inactive'
-        }
-
-        const updateData: Record<string, unknown> = {
-          subscription_status: status,
-          stripe_subscription_id: sub.id,
-        }
-        if (planType) updateData.plan_type = planType
-
-        await admin.from('contractors').update(updateData).eq('id', contractorId)
-        break
-      }
-
-      // -------------------------------------------------------
-      case 'customer.subscription.deleted': {
-        const sub = event.data.object as Stripe.Subscription
-        const contractorId = sub.metadata?.contractor_id
-        if (!contractorId) break
-
-        await admin.from('contractors').update({
-          subscription_status: 'canceled',
-          plan_type: 'none',
-        }).eq('id', contractorId)
-
-        // Send cancellation notifications
-        const { data: contractor } = await admin
-          .from('contractors').select('*').eq('id', contractorId).single()
         if (contractor) {
+          // Assign account manager for Elite Plus
+          if (contractor.plan_type === 'elite_plus') {
+            const { data: managers } = await admin
+              .from('team_members')
+              .select('id, user_id')
+              .eq('role', 'account_manager')
+              .eq('status', 'active')
+              .limit(1)
+
+            if (managers && managers.length > 0) {
+              await admin.from('account_manager_assignments').insert({
+                contractor_id: contractor.id,
+                account_manager_id: managers[0].id,
+                assigned_at: new Date().toISOString(),
+                is_active: true,
+              })
+
+              const { data: userData } = await admin.auth.admin.getUserById(managers[0].user_id)
+              const managerEmail = userData?.user?.email
+              if (managerEmail) {
+                await sendAccountManagerWelcomeEmail(managerEmail, contractor)
+              }
+            }
+          }
+
+          // Record initial ZIP claims for all existing ZIPs
+          for (const zip of (contractor.zip_codes ?? [])) {
+            const claimType = contractor.plan_type === 'elite' ? 'exclusive' : contractor.plan_type === 'elite_plus' ? 'super_exclusive' : 'available'
+            await recordZipClaim(contractor.id, zip, contractor.niche, claimType, contractor.plan_type)
+          }
+        }
+        break
+      }
+
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as any
+        const previousAttrs = event.data.previous_attributes as any
+
+        const { data: contractor } = await admin
+          .from('contractors')
+          .select('*')
+          .eq('stripe_subscription_id', subscription.id)
+          .single()
+
+        if (contractor) {
+          // Detect pause/resume via pause_collection status
+          if (previousAttrs?.pause_collection !== undefined) {
+            if (subscription.pause_collection?.resumes_at) {
+              // Paused
+              await admin.from('contractors').update({
+                pause_subscription_until: new Date(subscription.pause_collection.resumes_at * 1000).toISOString(),
+                subscription_status: 'paused',
+              }).eq('id', contractor.id)
+            } else if (previousAttrs.pause_collection) {
+              // Resumed
+              await admin.from('contractors').update({
+                pause_subscription_until: null,
+                subscription_status: 'active',
+              }).eq('id', contractor.id)
+            }
+          }
+        }
+        break
+      }
+
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as any
+        await admin
+          .from('contractors')
+          .update({ subscription_status: 'cancelled', cancellation_at: new Date().toISOString() })
+          .eq('stripe_subscription_id', subscription.id)
+        break
+      }
+
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as any
+        const { data: contractor } = await admin
+          .from('contractors')
+          .select('id, user_id, lead_credits_remaining, plan_type')
+          .eq('stripe_customer_id', invoice.customer)
+          .single()
+
+        if (contractor && invoice.billing_reason === 'subscription_cycle') {
+          // Monthly renewal: grant credits
+          const monthlyGrant = getMonthlyCredits(contractor.plan_type)
+          const newBalance = (contractor.lead_credits_remaining ?? 0) + monthlyGrant
+
+          await admin.from('contractors').update({ lead_credits_remaining: newBalance }).eq('id', contractor.id)
+          await admin.from('credit_transactions').insert({
+            contractor_id: contractor.id,
+            transaction_type: 'monthly_grant',
+            amount: monthlyGrant,
+            balance_after: newBalance,
+            description: `Invoice #${invoice.number}: Monthly credit grant`,
+          })
+
           const { data: userData } = await admin.auth.admin.getUserById(contractor.user_id)
           const email = userData?.user?.email
-          if (email) await sendCancellationEmail(email, contractor)
+          if (email) {
+            await sendMonthlyCreditsGrantedEmail(email, contractor, monthlyGrant, newBalance, 30)
+          }
         }
-
         break
       }
 
-      // -------------------------------------------------------
-      case 'invoice.payment_succeeded': {
-        const invoice = event.data.object as Stripe.Invoice
-        const sub = invoice.subscription as string
-        if (!sub) break
-
-        // Find contractor by subscription ID
-        const { data: contractor } = await admin
-          .from('contractors')
-          .select('*')
-          .eq('stripe_subscription_id', sub)
-          .single()
-
-        if (!contractor) break
-
-        // On Pro renewal — reset monthly lead count
-        if (contractor.plan_type === 'pro') {
-          await admin.from('contractors').update({
-            leads_used_this_month: 0,
-            leads_reset_at: new Date().toISOString(),
-            subscription_status: 'active',
-          }).eq('id', contractor.id)
-        } else {
-          await admin.from('contractors').update({
-            subscription_status: 'active',
-          }).eq('id', contractor.id)
-        }
-
-        break
-      }
-
-      // -------------------------------------------------------
-      case 'invoice.payment_failed': {
-        const invoice = event.data.object as Stripe.Invoice
-        const sub = invoice.subscription as string
-        if (!sub) break
-
-        const { data: contractor } = await admin
-          .from('contractors')
-          .select('*')
-          .eq('stripe_subscription_id', sub)
-          .single()
-
-        if (!contractor) break
-
-        await admin.from('contractors').update({
-          subscription_status: 'past_due',
-        }).eq('id', contractor.id)
-
-        // Notify contractor via email and SMS
-        const { data: userData } = await admin.auth.admin.getUserById(contractor.user_id)
-        const email = userData?.user?.email
-
-        if (email) await sendPaymentFailedEmail(email, contractor)
-        await sendPaymentFailedSMS(contractor)
-
-        break
-      }
-
-      // -------------------------------------------------------
       case 'payment_intent.succeeded': {
-        const intent = event.data.object as Stripe.PaymentIntent
-        const contractorId = intent.metadata?.contractor_id
-        const leadId = intent.metadata?.lead_id
+        const paymentIntent = event.data.object as any
+        const { lead_id, contractor_id, type } = paymentIntent.metadata ?? {}
 
-        if (!contractorId || !leadId) break
-
-        // Verify lead is still available before claiming
-        const { data: lead } = await admin
-          .from('leads').select('*').eq('id', leadId).single()
-        if (!lead || lead.status !== 'available') break
-
-        const { data: contractor } = await admin
-          .from('contractors').select('*').eq('id', contractorId).single()
-        if (!contractor) break
-
-        // Claim the lead
-        await admin.from('leads').update({
-          status: 'claimed',
-          claimed_by: contractorId,
-          claimed_at: new Date().toISOString(),
-        }).eq('id', leadId).eq('status', 'available') // Atomic guard
-
-        // Record claim
-        const isOverage = contractor.plan_type === 'pro' && contractor.leads_used_this_month >= 30
-        await admin.from('lead_claims').insert({
-          lead_id: leadId,
-          contractor_id: contractorId,
-          payment_type: 'pay_per_lead',
-          amount_charged: intent.amount / 100,
-          stripe_payment_intent_id: intent.id,
-        })
-
-        // Increment usage count for Pro
-        if (contractor.plan_type === 'pro') {
-          await admin.from('contractors').update({
-            leads_used_this_month: contractor.leads_used_this_month + 1,
-          }).eq('id', contractorId)
+        if (lead_id && contractor_id) {
+          if (type === 'overage') {
+            // Grant 1 credit and mark lead as claimed
+            const amount = paymentIntent.amount_received / 100
+            await admin.from('contractors').update({ lead_credits_remaining: 1 }).eq('id', contractor_id)
+            await admin.from('leads').update({ status: 'claimed', claimed_by_contractor_id: contractor_id }).eq('id', lead_id)
+            await admin.from('credit_transactions').insert({
+              contractor_id,
+              transaction_type: 'overage_payment',
+              amount: 1,
+              balance_after: 1,
+              lead_id,
+              description: `Overage payment: $${amount.toFixed(2)}`,
+            })
+          } else if (type === 'pay_per_lead') {
+            // Mark PPL lead as claimed
+            await admin.from('leads').update({ status: 'claimed', claimed_by_contractor_id: contractor_id, payment_type: 'pay_per_lead' }).eq('id', lead_id)
+          }
         }
-
         break
       }
-
-      default:
-        // Ignore unhandled event types
-        break
     }
 
     return Response.json({ received: true })
   } catch (err) {
-    await logError('webhook_processing', safeErrorMessage(err), { event_type: event.type, event_id: event.id })
-    // Return 200 to prevent Stripe from retrying — we already logged the error
-    return Response.json({ received: true, error: 'Internal processing error' })
+    await logError('stripe_webhook_error', String(err))
+    return structuredError('Webhook processing failed', 500)
   }
 }

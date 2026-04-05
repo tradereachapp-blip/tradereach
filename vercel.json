@@ -1,20 +1,24 @@
 {
   "crons": [
     {
-      "path": "/api/cron/daily-cleanup",
-      "schedule": "0 6 * * *"
+      "path": "/api/cron/monthly-credits",
+      "schedule": "0 0 1 * *"
     },
     {
-      "path": "/api/cron/monitor",
+      "path": "/api/cron/credit-warnings",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/zip-capacity",
       "schedule": "0 7 * * *"
     },
     {
-      "path": "/api/cron/daily-report",
-      "schedule": "0 15 * * *"
+      "path": "/api/cron/pause-resume",
+      "schedule": "0 8 * * *"
     },
     {
-      "path": "/api/cron/notify-queue",
-      "schedule": "0 8 * * *"
+      "path": "/api/cron/account-manager-reviews",
+      "schedule": "0 9 1 * *"
     }
   ]
 }

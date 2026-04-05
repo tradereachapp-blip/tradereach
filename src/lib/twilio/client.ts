@@ -10,7 +10,7 @@ export function getTwilioClient(): ReturnType<typeof twilio> {
     const token = process.env.TWILIO_AUTH_TOKEN
     if (!sid || !token) {
       throw new Error(
-        'Twilio credentials missing: TWIFIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN must be set in environment variables.'
+        'Twilio credentials missing: TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN must be set in environment variables.'
       )
     }
     _client = twilio(sid, token)

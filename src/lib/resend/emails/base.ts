@@ -1,5 +1,5 @@
 // ============================================================
-// TradeReach Email Base — Shared layout primitives
+// TradeReach Email Base – Shared layout primitives
 // All emails are rendered as inline-CSS HTML strings for
 // maximum compatibility across Gmail, Outlook, Apple Mail,
 // and mobile clients.
@@ -20,10 +20,10 @@ export const BRAND = {
   red: '#dc2626',
   fontStack: 'Arial, Helvetica, sans-serif',
   maxWidth: '600px',
-  address: 'TradeReach &bull; Vacaville, CA 95688',
+  address: 'TradeReach • Vacaville, CA 95688',
 }
 
-/** Bulletproof HTML wrapper — doctype + full meta */
+/** Bulletproof HTML wrapper – doctype + full meta */
 export function htmlWrapper(bodyContent: string): string {
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -131,7 +131,7 @@ export function ctaButton(label: string, url: string): string {
           <center style="color:${BRAND.white};font-family:${BRAND.fontStack};font-size:16px;font-weight:700;">${label}</center>
         </v:roundrect>
         <![endif]-->
-        <!--[if !mso]><!-->
+        <!--[if !mso]><!---->
         <a href="${url}" target="_blank"
            style="display:inline-block;background-color:${BRAND.orange};color:${BRAND.white};font-family:${BRAND.fontStack};font-size:16px;font-weight:700;line-height:1;padding:16px 36px;text-decoration:none;border-radius:6px;">
           ${label}
@@ -172,7 +172,7 @@ export function checklistItem(text: string): string {
         <tr>
           <td style="width:28px;vertical-align:top;">
             <div style="width:22px;height:22px;border-radius:50%;background-color:${BRAND.orange};text-align:center;line-height:22px;">
-              <span style="color:${BRAND.white};font-size:12px;font-weight:700;font-family:${BRAND.fontStack};">&#10003;</span>
+              <span style="color:${BRAND.white};font-size:12px;font-weight:700;font-family:${BRAND.fontStack};">✓</span>
             </div>
           </td>
           <td style="padding-left:12px;vertical-align:middle;">

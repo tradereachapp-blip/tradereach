@@ -1,6 +1,6 @@
 // ============================================================
-// Email 5 â Monthly Performance Summary
-// Subject: Your TradeReach Report â [Month] [Year]
+// Email 5 – Monthly Performance Summary
+// Subject: Your TradeReach Report – [Month] [Year]
 // ============================================================
 
 import { htmlWrapper, emailHeader, emailBody, contractorFooter, ctaButton, statCard, BRAND } from './base'
@@ -21,7 +21,7 @@ export function renderMonthlyPerformance(props: MonthlyPerformanceProps): string
   const body = `
     <!-- Headline -->
     <h1 style="margin:0 0 6px;font-size:26px;font-weight:800;color:${BRAND.navy};font-family:${BRAND.fontStack};line-height:1.2;">Your Monthly Performance Report</h1>
-    <p style="margin:0 0 32px;font-size:15px;color:${BRAND.gray500};font-family:${BRAND.fontStack};">Hi ${firstName} &mdash; here is your TradeReach summary for <strong>${month}</strong>.</p>
+    <p style="margin:0 0 32px;font-size:15px;color:${BRAND.gray500};font-family:${BRAND.fontStack};">Hi ${firstName} — here is your TradeReach summary for <strong>${month}</strong>.</p>
 
     <!-- Stats Grid -->
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:10px;">
@@ -58,7 +58,7 @@ export function renderMonthlyPerformance(props: MonthlyPerformanceProps): string
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:24px;">
       <tr>
         <td align="center">
-          ${ctaButton('View Your Dashboard &rarr;', dashboardUrl)}
+          ${ctaButton('View Your Dashboard →', dashboardUrl)}
         </td>
       </tr>
     </table>

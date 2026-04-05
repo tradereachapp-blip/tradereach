@@ -1,5 +1,5 @@
 // ============================================================
-// Email 7 â Cancellation Confirmation
+// Email 7 – Cancellation Confirmation
 // Subject: Your TradeReach Subscription Has Been Cancelled
 // ============================================================
 
@@ -50,7 +50,7 @@ export function renderCancellation(props: CancellationProps): string {
             </tr>
           </table>
 
-          ${ctaButton('Reactivate My Account &rarr;', reactivateUrl)}
+          ${ctaButton('Reactivate My Account →', reactivateUrl)}
         </td>
       </tr>
     </table>

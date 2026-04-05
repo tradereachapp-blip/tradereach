@@ -23,7 +23,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files â NEVER commit these
+# local env files — NEVER commit these
 .env
 .env*.local
 .env.local

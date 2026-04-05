@@ -1,13 +1,31 @@
 import LogoBadge from '@/components/LogoBadge'
-import { PRICING } from '@/lib/pricing'
 import SiteFooter from '@/components/SiteFooter'
+import PricingSection from '@/components/marketing/PricingSection'
+import { createAdminClient } from '@/lib/supabase/server'
+import { PRICING } from '@/lib/pricing'
+
+export const revalidate = 60 // revalidate founding spots every 60s
 
 export const metadata = {
-  title: 'TradeReach — Home Service Leads for Contractors',
-  description: 'Stop chasing cold leads. Start closing warm ones. TradeReach sends you homeowners who are ready for a quote.',
+  title: 'TradeReach™ — Home Service Leads for Contractors',
+  description: 'Stop chasing cold leads. Start closing warm ones. TradeReach™ sends you homeowners who are ready for a quote.',
 }
 
-export default function ContractorsPage() {
+export default async function ContractorsPage() {
+  // Fetch live founding member spot counts
+  const admin = createAdminClient()
+  const { data: spots } = await admin
+    .from('founding_member_counts')
+    .select('plan_type, filled_spots, max_spots')
+
+  const proRow = spots?.find(s => s.plan_type === 'pro')
+  const eliteRow = spots?.find(s => s.plan_type === 'elite')
+
+  const foundingSpots = {
+    pro: { filled: proRow?.filled_spots ?? 0, max: proRow?.max_spots ?? PRICING.PRO_FOUNDING_SPOTS },
+    elite: { filled: eliteRow?.filled_spots ?? 0, max: eliteRow?.max_spots ?? PRICING.ELITE_FOUNDING_SPOTS },
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       {/* Nav */}
@@ -28,6 +46,18 @@ export default function ContractorsPage() {
         </div>
       </nav>
 
+      {/* Founding member urgency bar */}
+      {(foundingSpots.pro.filled < foundingSpots.pro.max || foundingSpots.elite.filled < foundingSpots.elite.max) && (
+        <div className="py-2.5 px-4 text-center text-xs font-semibold"
+          style={{ background: 'rgba(251,191,36,0.08)', borderBottom: '1px solid rgba(251,191,36,0.2)', color: 'rgb(251,191,36)' }}>
+          ⭐ Founding Member pricing active —{' '}
+          {foundingSpots.pro.max - foundingSpots.pro.filled > 0 && `${foundingSpots.pro.max - foundingSpots.pro.filled} Pro spots`}
+          {foundingSpots.pro.max - foundingSpots.pro.filled > 0 && foundingSpots.elite.max - foundingSpots.elite.filled > 0 && ' · '}
+          {foundingSpots.elite.max - foundingSpots.elite.filled > 0 && `${foundingSpots.elite.max - foundingSpots.elite.filled} Elite spots`}
+          {' '}remaining. Lock in your rate for life.
+        </div>
+      )}
+
       {/* Hero */}
       <section className="py-20 md:py-28 px-4 text-center">
         <div className="max-w-4xl mx-auto">
@@ -40,7 +70,7 @@ export default function ContractorsPage() {
             <span className="text-orange-500">Start Closing Warm Ones.</span>
           </h1>
           <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-            TradeReach sends you homeowners who already want a quote. You show up and close.
+            TradeReach™ sends you homeowners who already want a quote. You show up and close.
             No door-knocking. No cold calls. Just real jobs.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
@@ -81,12 +111,12 @@ export default function ContractorsPage() {
       {/* How It Works */}
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-3">How TradeReach Works</h2>
+          <h2 className="text-3xl font-bold text-center mb-3">How TradeReach™ Works</h2>
           <p className="text-gray-400 text-center mb-14">Three steps from homeowner request to your phone ringing</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { icon: '📝', step: '1', title: 'Homeowner requests a quote', desc: 'A real homeowner fills out our form and tells us exactly what service they need and when they want to be called.' },
-              { icon: '⚡', step: '2', title: 'We match them to you', desc: 'We instantly find licensed contractors in their ZIP code who specialize in their service type. You\'re notified within seconds.' },
+              { icon: '⚡', step: '2', title: 'We match them to you', desc: "We instantly find licensed contractors in their ZIP code who specialize in their service type. You're notified within seconds." },
               { icon: '📞', step: '3', title: 'You claim the lead and close', desc: 'You get an SMS and email with lead details. Log in, claim it before another contractor does, then call and close.' },
             ].map((s) => (
               <div key={s.step} className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-orange-500/40 transition-colors">
@@ -100,79 +130,8 @@ export default function ContractorsPage() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="py-20 px-4 bg-white/2">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-3">Simple, Transparent Pricing</h2>
-          <p className="text-gray-400 text-center mb-14">No setup fees. No long-term contracts. Cancel anytime.</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Pay Per Lead */}
-            <div className="bg-white/5 border border-white/15 rounded-2xl p-6">
-              <h4 className="font-bold text-white text-xl mb-1">Pay Per Lead</h4>
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-4xl font-black text-white">$45</span>
-                <span className="text-gray-400 text-sm">/lead</span>
-              </div>
-              <p className="text-gray-500 text-xs mb-6">No monthly commitment</p>
-              <ul className="text-sm text-gray-300 space-y-2.5 mb-8">
-                <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> Pay only when you claim</li>
-                <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> Up to 5 ZIP codes</li>
-                <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> Email &amp; SMS alerts</li>
-                <li className="flex gap-2"><span className="text-gray-600">–</span> Shared territory</li>
-                <li className="flex gap-2"><span className="text-gray-600">–</span> No priority delivery</li>
-              </ul>
-              <a href="/signup" className="block w-full text-center py-3 border border-white/25 text-white rounded-xl hover:bg-white/8 transition-all font-medium text-sm">
-                Get Started
-              </a>
-            </div>
-
-            {/* Pro */}
-            <div className="bg-blue-900/25 border border-blue-500/40 rounded-2xl p-6">
-              <h4 className="font-bold text-white text-xl mb-1">Pro</h4>
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-4xl font-black text-white">{`$${PRICING.PRO_MONTHLY}`}</span>
-                <span className="text-gray-400 text-sm">/mo</span>
-              </div>
-              <p className="text-blue-400 text-xs mb-6">7-day free trial included</p>
-              <ul className="text-sm text-gray-300 space-y-2.5 mb-8">
-                <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> {PRICING.PRO_LEAD_CAP} leads/month included</li>
-                <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> ${PRICING.PRO_OVERAGE}/lead after monthly cap</li>
-                <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> Up to 10 ZIP codes</li>
-                <li className="flex gap-2"><span className="text-green-400 font-bold">✓</span> Email &amp; SMS alerts</li>
-                <li className="flex gap-2"><span className="text-gray-600">–</span> Shared territory</li>
-              </ul>
-              <a href="/signup" className="block w-full text-center py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-semibold text-sm">
-                Start Free Trial
-              </a>
-            </div>
-
-            {/* Elite */}
-            <div className="bg-orange-500/8 border-2 border-orange-500 rounded-2xl p-6 relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                <span className="bg-orange-500 text-white text-xs font-bold px-4 py-1.5 rounded-full">
-                  MOST POPULAR
-                </span>
-              </div>
-              <h4 className="font-bold text-white text-xl mb-1 mt-2">Elite</h4>
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-4xl font-black text-white">{`$${PRICING.ELITE_MONTHLY}`}</span>
-                <span className="text-gray-400 text-sm">/mo</span>
-              </div>
-              <p className="text-orange-400 text-xs mb-6">7-day free trial included</p>
-              <ul className="text-sm text-gray-200 space-y-2.5 mb-8">
-                <li className="flex gap-2"><span className="text-orange-400 font-bold">✓</span> <strong>Unlimited</strong> leads/month</li>
-                <li className="flex gap-2"><span className="text-orange-400 font-bold">✓</span> Exclusive ZIP territory</li>
-                <li className="flex gap-2"><span className="text-orange-400 font-bold">✓</span> 15-min priority head start</li>
-                <li className="flex gap-2"><span className="text-orange-400 font-bold">✓</span> Unlimited ZIP codes</li>
-                <li className="flex gap-2"><span className="text-orange-400 font-bold">✓</span> No overage charges — ever</li>
-              </ul>
-              <a href="/signup" className="block w-full text-center py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl transition-all font-bold text-sm">
-                Start Free Trial
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Pricing — client component with toggle + founding member */}
+      <PricingSection foundingSpots={foundingSpots} />
 
       {/* FAQ */}
       <section className="py-20 px-4">
@@ -185,8 +144,12 @@ export default function ContractorsPage() {
                 a: 'Every lead is submitted in real time by a homeowner. The moment they hit submit, you get an SMS and email. There is no delay, no recycling, no reselling. Elite contractors get a 15-minute exclusive window before the lead goes to anyone else.',
               },
               {
+                q: 'What is Founding Member pricing?',
+                a: `The first ${PRICING.PRO_FOUNDING_SPOTS} Pro and ${PRICING.ELITE_FOUNDING_SPOTS} Elite subscribers lock in a lower rate for life. Pro founding price is $${PRICING.PRO_MONTHLY_FOUNDING}/mo and Elite is $${PRICING.ELITE_MONTHLY_FOUNDING}/mo. Once those spots are filled, the price goes up to $${PRICING.PRO_MONTHLY}/$${PRICING.ELITE_MONTHLY} for new subscribers. Your rate never changes.`,
+              },
+              {
                 q: 'Can I get a refund on a bad lead?',
-                a: 'If a lead has an invalid or disconnected phone number, contact support and we\'ll review it. We do not offer refunds for leads that didn\'t convert — the homeowner was real and actively requested a quote. Closing is on you.',
+                a: "If a lead has an invalid or disconnected phone number, contact support and we'll review it. We do not offer refunds for leads that didn't convert — the homeowner was real and actively requested a quote. Closing is on you.",
               },
               {
                 q: 'How many contractors compete for the same lead?',
@@ -195,10 +158,6 @@ export default function ContractorsPage() {
               {
                 q: 'How do I cancel?',
                 a: 'Cancel anytime in one click from your account settings. No cancellation fees, no calls to make, no questions asked. Your access continues until the end of the current billing period.',
-              },
-              {
-                q: 'What niches are available?',
-                a: 'We currently match leads for Roofing, HVAC, and Plumbing. You pick your niche during signup. Additional verticals are in the roadmap.',
               },
             ].map((faq, i) => (
               <div key={i} className="bg-white/4 border border-white/10 rounded-xl p-5">
@@ -215,7 +174,7 @@ export default function ContractorsPage() {
         <div className="max-w-2xl mx-auto">
           <h2 className="text-4xl font-black mb-4">Ready to fill your pipeline?</h2>
           <p className="text-gray-400 text-lg mb-8">
-            Join 500+ contractors already growing with TradeReach. Your first 7 days are free.
+            Join 500+ contractors already growing with TradeReach™. Your first 7 days are free.
           </p>
           <a
             href="/signup"

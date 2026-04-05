@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Contractor } from '@/types'
 import { NICHES } from '@/lib/config'
 import type { Niche } from '@/types'
 import PhoneInput from './PhoneInput'
 import { playAlertSound } from './LeadAlertSiren'
+import AvatarComponent from './AvatarComponent'
 
 interface Props {
   contractor: Contractor
@@ -97,6 +98,12 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
   const [savingPass, setSavingPass] = useState(false)
   const [passMsg, setPassMsg] = useState('')
 
+  // Profile photo
+  const [photoUrl, setPhotoUrl] = useState<string | null>((contractor as any).profile_photo_url ?? null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [photoMsg, setPhotoMsg] = useState('')
+  const photoInputRef = useRef<HTMLInputElement>(null)
+
   // Portal
   const [loadingPortal, setLoadingPortal] = useState(false)
 
@@ -185,6 +192,63 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
     setLoadingPortal(false)
   }
 
+  async function uploadPhoto(file: File) {
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) { setPhotoMsg('Error: File must be under 5MB.'); return }
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+      setPhotoMsg('Error: Only JPEG, PNG, or WebP allowed.'); return
+    }
+    setUploadingPhoto(true)
+    setPhotoMsg('')
+    try {
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `${contractor.id}/avatar.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('contractor-avatars')
+        .upload(path, file, { upsert: true, contentType: file.type })
+      if (uploadError) throw uploadError
+      const { data: { publicUrl } } = supabase.storage
+        .from('contractor-avatars')
+        .getPublicUrl(path)
+      // Bust cache by appending timestamp
+      const urlWithBust = `${publicUrl}?t=${Date.now()}`
+      const { error: dbError } = await supabase
+        .from('contractors')
+        .update({ profile_photo_url: urlWithBust })
+        .eq('id', contractor.id)
+      if (dbError) throw dbError
+      setPhotoUrl(urlWithBust)
+      setPhotoMsg('✓ Photo updated')
+    } catch (e: any) {
+      setPhotoMsg(`Error: ${e.message ?? 'Upload failed'}`)
+    }
+    setUploadingPhoto(false)
+  }
+
+  async function removePhoto() {
+    if (!confirm('Remove your profile photo?')) return
+    setUploadingPhoto(true)
+    setPhotoMsg('')
+    try {
+      await supabase.storage.from('contractor-avatars').remove([
+        `${contractor.id}/avatar.jpg`,
+        `${contractor.id}/avatar.jpeg`,
+        `${contractor.id}/avatar.png`,
+        `${contractor.id}/avatar.webp`,
+      ])
+      const { error } = await supabase
+        .from('contractors')
+        .update({ profile_photo_url: null })
+        .eq('id', contractor.id)
+      if (error) throw error
+      setPhotoUrl(null)
+      setPhotoMsg('✓ Photo removed')
+    } catch (e: any) {
+      setPhotoMsg(`Error: ${e.message ?? 'Remove failed'}`)
+    }
+    setUploadingPhoto(false)
+  }
+
   async function deleteAccount() {
     if (!confirm('Are you sure? This will permanently delete your account and cancel your subscription.')) return
     const res = await fetch('/api/contractors/settings', { method: 'DELETE', headers: { 'Content-Type': 'application/json' } })
@@ -197,6 +261,50 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
 
   return (
     <div className="space-y-5 max-w-2xl">
+
+      {/* Profile Photo */}
+      <SectionCard icon="📷" title="Profile Photo">
+        <div className="flex items-center gap-6">
+          <AvatarComponent
+            photoUrl={photoUrl}
+            contactName={contractor.contact_name}
+            businessName={contractor.business_name}
+            size={80}
+            showOnlineDot={false}
+          />
+          <div className="flex-1">
+            <p className="text-sm text-gray-400 mb-3">
+              Your photo appears in the dashboard nav and your team profile. JPEG, PNG, or WebP — max 5MB.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) uploadPhoto(f) }}
+              />
+              <button
+                onClick={() => photoInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all hover:scale-[1.02]"
+              >
+                {uploadingPhoto ? 'Uploading...' : photoUrl ? 'Change Photo' : 'Upload Photo'}
+              </button>
+              {photoUrl && (
+                <button
+                  onClick={removePhoto}
+                  disabled={uploadingPhoto}
+                  className="border border-white/10 text-gray-400 hover:text-red-400 hover:border-red-500/30 font-semibold px-4 py-2 rounded-xl text-sm transition-all"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+            <StatusMsg msg={photoMsg} />
+          </div>
+        </div>
+      </SectionCard>
 
       {/* Business Info */}
       <SectionCard icon="🏢" title="Business Information">
@@ -411,7 +519,7 @@ export default function SettingsForm({ contractor, userEmail }: Props) {
           </div>
           <div>
             <label className={darkLabel}>Confirm Password</label>
-            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className={darkInput} placeholder="••••••••" />
+            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className={darkInput} placeholder="•••••••••" />
           </div>
           <div className="flex justify-end">
             <DarkButton onClick={changePassword} disabled={savingPass}>{savingPass ? 'Updating...' : 'Update Password'}</DarkButton>

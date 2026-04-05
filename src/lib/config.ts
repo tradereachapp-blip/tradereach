@@ -1,92 +1,77 @@
-// ============================================================
-// TradeReach — Central Config
-// Add new niches, plan tiers, and ZIP limits here only
-// ============================================================
+import { PRICING } from './pricing'
 
-import type { Niche, PlanType } from '@/types'
-import { PRICING } from '@/lib/pricing'
-
-export const NICHES: Niche[] = ['Roofing', 'HVAC', 'Plumbing']
-
-export const NICHE_DESCRIPTIONS: Record<Niche, string> = {
-  Roofing: 'Roof repairs, replacements, inspections, gutters, and storm damage.',
-  HVAC: 'Heating, cooling, ventilation, AC installation, and furnace repair.',
-  Plumbing: 'Pipe repair, water heaters, drain cleaning, and fixture installation.',
-}
-
-export const NICHE_ICONS: Record<Niche, string> = {
-  Roofing: '🏠',
-  HVAC: '❄️',
-  Plumbing: '🔧',
-}
-
-export const PLAN_CONFIG: Record<PlanType, {
-  label: string
-  price: number | null
-  monthlyLeads: number | 'unlimited'
-  maxZipCodes: number | 'unlimited'
-  hasExclusiveTerritory: boolean
-  hasPriorityDelivery: boolean
-  hasFreeTrial: boolean
-  trialDays: number
-  overagePrice: number | null
-  priceId: string | null
-}> = {
-  none: {
-    label: 'No Plan',
-    price: null,
-    monthlyLeads: 0,
-    maxZipCodes: 0,
-    hasExclusiveTerritory: false,
-    hasPriorityDelivery: false,
-    hasFreeTrial: false,
-    trialDays: 0,
-    overagePrice: null,
-    priceId: null,
-  },
-  pay_per_lead: {
-    label: 'Pay Per Lead',
+export const PLAN_CONFIG = {
+  ppl: {
+    name: 'Pay Per Lead',
+    label: 'PPL',
+    description: 'Pay for each lead you claim',
     price: PRICING.PPL_PRICE,
-    monthlyLeads: 'unlimited',
+    billing: 'per-lead',
+    credits: 0,
     maxZipCodes: 5,
-    hasExclusiveTerritory: false,
-    hasPriorityDelivery: false,
-    hasFreeTrial: false,
-    trialDays: 0,
-    overagePrice: null,
-    priceId: null,
+    hasAccountManager: false,
+    hasMonthlyReview: false,
   },
   pro: {
+    name: 'Pro',
     label: 'Pro',
+    description: '15 leads/month + shared territories',
     price: PRICING.PRO_MONTHLY,
-    monthlyLeads: PRICING.PRO_LEAD_CAP,
-    maxZipCodes: 10,
-    hasExclusiveTerritory: false,
-    hasPriorityDelivery: false,
-    hasFreeTrial: true,
-    trialDays: 7,
-    overagePrice: PRICING.PRO_OVERAGE,
-    priceId: process.env.STRIPE_PRO_PRICE_ID ?? null,
+    annualPrice: PRICING.PRO_ANNUAL,
+    founding: PRICING.PRO_FOUNDING_MONTHLY,
+    foundingAnnual: PRICING.PRO_ANNUAL_FOUNDING,
+    billing: 'monthly',
+    credits: PRICING.PRO_CREDITS,
+    rolloverMax: PRICING.PRO_ROLLOVER_MAX,
+    overage: PRICING.PRO_OVERAGE,
+    maxZipCodes: 5,
+    hasAccountManager: false,
+    hasMonthlyReview: false,
+    foundingSpots: 10,
   },
   elite: {
+    name: 'Elite',
     label: 'Elite',
+    description: '30 leads/month + exclusive territories',
     price: PRICING.ELITE_MONTHLY,
-    monthlyLeads: 'unlimited',
-    maxZipCodes: 'unlimited' as any,
-    hasExclusiveTerritory: true,
-    hasPriorityDelivery: true,
-    hasFreeTrial: true,
-    trialDays: 7,
-    overagePrice: null,
-    priceId: process.env.STRIPE_ELITE_PRICE_ID ?? null,
+    annualPrice: PRICING.ELITE_ANNUAL,
+    founding: PRICING.ELITE_FOUNDING_MONTHLY,
+    foundingAnnual: PRICING.ELITE_ANNUAL_FOUNDING,
+    billing: 'monthly',
+    credits: PRICING.ELITE_CREDITS,
+    rolloverMax: PRICING.ELITE_ROLLOVER_MAX,
+    overage: PRICING.ELITE_OVERAGE,
+    maxZipCodes: 'unlimited',
+    hasAccountManager: false,
+    hasMonthlyReview: false,
+    foundingSpots: 5,
+  },
+  elite_plus: {
+    name: 'Elite Plus',
+    label: 'Elite Plus',
+    description: '60 leads/month + super-exclusive + account manager',
+    price: PRICING.ELITE_PLUS_MONTHLY,
+    annualPrice: PRICING.ELITE_PLUS_ANNUAL,
+    billing: 'monthly',
+    credits: PRICING.ELITE_PLUS_CREDITS,
+    rolloverMax: PRICING.ELITE_PLUS_ROLLOVER_MAX,
+    overage: PRICING.ELITE_PLUS_OVERAGE,
+    maxZipCodes: 'unlimited',
+    hasAccountManager: true,
+    hasMonthlyReview: true,
+    foundingSpots: 0,
   },
 }
 
-export const ELITE_PRIORITY_WINDOW_MINUTES = 15
-export const LEAD_EXPIRY_HOURS = 72
-export const DUPLICATE_LEAD_WINDOW_HOURS = 24
-export const PRO_MONTHLY_LEAD_CAP = PRICING.PRO_LEAD_CAP
-export const PAY_PER_LEAD_PRICE_CENTS = PRICING.PPL_PRICE * 100   // $45.00 → 4500
-export const PRO_OVERAGE_PRICE_CENTS  = PRICING.PRO_OVERAGE * 100 // $30.00 → 3000
+export const ZIP_CAPACITY = {
+  max_pro: 3,
+  max_elite: 2,
+  max_elite_plus: 1,
+}
 
-export const CALLBACK_TIMES = ['Morning', 'Afternoon', 'Evening', 'Anytime'] as const
+export const NOTIFICATION_WINDOWS = {
+  elite_plus: 30, // minutes
+  elite: 15,
+  pro: 5,
+  ppl: 'unlimited',
+}

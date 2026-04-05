@@ -1,5 +1,5 @@
 // ============================================================
-// Email 6 â Homeowner Quote Confirmation
+// Email 6 – Homeowner Quote Confirmation
 // Subject: Your Quote Request Was Received
 // ============================================================
 
@@ -40,7 +40,7 @@ export function renderHomeownerConfirmation(props: HomeownerConfirmationProps): 
         <tr>
           <td align="center">
             <div style="width:56px;height:56px;border-radius:50%;background-color:#dcfce7;text-align:center;line-height:56px;display:inline-block;">
-              <span style="font-size:26px;color:#16a34a;">&#10003;</span>
+              <span style="font-size:26px;color:#16a34a;">✓</span>
             </div>
           </td>
         </tr>
@@ -49,7 +49,7 @@ export function renderHomeownerConfirmation(props: HomeownerConfirmationProps): 
       <!-- Headline -->
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:800;color:${BRAND.navy};font-family:${BRAND.fontStack};text-align:center;line-height:1.3;">We received your request.</h1>
       <p style="margin:0 0 28px;font-size:15px;color:${BRAND.gray700};font-family:${BRAND.fontStack};text-align:center;line-height:1.7;">
-        Hi ${firstName} &mdash; a trusted local contractor in your area will contact you within <strong>2 hours</strong> during business hours.
+        Hi ${firstName} — a trusted local contractor in your area will contact you within <strong>2 hours</strong> during business hours.
       </p>
 
       <!-- Summary Card -->
@@ -83,7 +83,7 @@ export function renderHomeownerConfirmation(props: HomeownerConfirmationProps): 
             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
               <tr>
                 <td style="width:28px;vertical-align:top;padding-top:2px;">
-                  <span style="font-size:16px;color:${BRAND.orange};">&#8226;</span>
+                  <span style="font-size:16px;color:${BRAND.orange};">•</span>
                 </td>
                 <td style="font-size:14px;color:${BRAND.gray700};font-family:${BRAND.fontStack};line-height:1.6;">They will call from a local number</td>
               </tr>
@@ -95,7 +95,7 @@ export function renderHomeownerConfirmation(props: HomeownerConfirmationProps): 
             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
               <tr>
                 <td style="width:28px;vertical-align:top;padding-top:2px;">
-                  <span style="font-size:16px;color:${BRAND.orange};">&#8226;</span>
+                  <span style="font-size:16px;color:${BRAND.orange};">•</span>
                 </td>
                 <td style="font-size:14px;color:${BRAND.gray700};font-family:${BRAND.fontStack};line-height:1.6;">The consultation is completely free</td>
               </tr>
@@ -107,9 +107,9 @@ export function renderHomeownerConfirmation(props: HomeownerConfirmationProps): 
             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
               <tr>
                 <td style="width:28px;vertical-align:top;padding-top:2px;">
-                  <span style="font-size:16px;color:${BRAND.orange};">&#8226;</span>
+                  <span style="font-size:16px;color:${BRAND.orange};">•</span>
                 </td>
-                <td style="font-size:14px;color:${BRAND.gray700};font-family:${BRAND.fontStack};line-height:1.6;">No obligation to hire &mdash; get the quote and decide at your own pace</td>
+                <td style="font-size:14px;color:${BRAND.gray700};font-family:${BRAND.fontStack};line-height:1.6;">No obligation to hire — get the quote and decide at your own pace</td>
               </tr>
             </table>
           </td>

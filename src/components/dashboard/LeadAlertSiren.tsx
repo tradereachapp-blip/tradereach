@@ -20,7 +20,7 @@ interface Props {
   alertSound?: string
 }
 
-// Audio context -- singleton to avoid hitting browser limit of 6 contexts
+// ── Audio context — singleton to avoid hitting browser limit of 6 contexts ─────
 // Browsers also require a user gesture before audio can play. We resume the
 // context lazily on first user interaction via the module-level listener below.
 let _audioCtx: AudioContext | null = null
@@ -155,6 +155,7 @@ export function playAlertSound(sound: string) {
   }
 }
 
+// ── Component ────────────────────────────────────────────────────────────────
 const NICHE_ICONS: Record<string, string> = {
   Roofing: '🏠', HVAC: '❄️', Plumbing: '🔧',
   Electrical: '⚡', 'Windows & Doors': '🪟', Painting: '🎨',
@@ -257,7 +258,7 @@ export default function LeadAlertSiren({
           <div className="p-6">
             <div className="flex items-center gap-4 mb-5">
               <div className="w-14 h-14 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-3xl flex-shrink-0">
-                {NICHE_ICONS[newLead.niche] ?? '🏡'}
+                {NICHE_ICONS[newLead.niche] ?? '🏠'}
               </div>
               <div>
                 <p className="text-white font-black text-xl">{newLead.name.split(' ')[0]}</p>
