@@ -37,7 +37,7 @@ const plans = [
   },
 ]
 
-const niches = ['Roofing', 'HVAC', 'Plumbing', 'Electrical', 'General']
+const niches = ['Roofing', 'HVAC', 'Plumbing', 'Electrical', 'Windows & Doors', 'Painting']
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -144,7 +144,7 @@ export default function OnboardingPage() {
                   <p className="text-sm text-gray-600 mb-4">{plan.description}</p>
                   <ul className="space-y-2 text-sm text-gray-700">
                     {plan.features.map((f) => (
-                      <li key={f}>✓ {f}</li>
+                      <li key={f}>â {f}</li>
                     ))}
                   </ul>
                 </button>
