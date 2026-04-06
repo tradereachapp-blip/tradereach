@@ -20,10 +20,15 @@ export default function ClaimLeadModal({ lead, contractor, onClose, onClaimed }:
   const [error, setError] = useState('')
   const [paymentIntentSecret, setPaymentIntentSecret] = useState('')
 
-  const isOverCap = contractor.plan_type === 'pro' && contractor.leads_used_this_month >= PRO_MONTHLY_LEAD_CAP
+  const creditsUsed = (contractor as any).leads_used_this_month ?? (contractor as any).lead_credits_used_this_month ?? 0
+  const isOverCap = contractor.plan_type === 'pro' && creditsUsed >= PRO_MONTHLY_LEAD_CAP
   const isPPL = contractor.plan_type === 'pay_per_lead'
   const requiresPayment = isOverCap || isPPL
   const amount = isOverCap ? PRICING.PRO_OVERAGE : isPPL ? PRICING.PPL_PRICE : 0
+
+  // Support both old and new column names for lead fields
+  const leadName = (lead as any).homeowner_name ?? (lead as any).name ?? 'Lead'
+  const firstName = leadName.split(' ')[0]
 
   async function handleInitialClaim() {
     setLoading(true)
@@ -116,7 +121,7 @@ export default function ClaimLeadModal({ lead, contractor, onClose, onClaimed }:
             <div>
               <div className="bg-gray-800/60 border border-white/8 rounded-xl p-4 mb-4 space-y-2.5">
                 {[
-                  ['First Name', lead.name.split(' ')[0]],
+                  ['First Name', firstName],
                   ['ZIP Code', lead.zip],
                   ['Service', lead.niche],
                   ['Best Time', lead.callback_time ?? 'Anytime'],
