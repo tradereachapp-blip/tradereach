@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
       .limit(20)
 
-    if (contractor.plan_type !== 'elite') {
+    if (contractor.plan_type !== 'elite' && contractor.plan_type !== 'elite_plus') {
       query = query.lt('created_at', eliteWindowStart.toISOString())
     }
 
