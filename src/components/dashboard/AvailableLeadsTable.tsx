@@ -64,7 +64,8 @@ export default function AvailableLeadsTable({ leads, contractor }: Props) {
   const [claimedIds, setClaimedIds] = useState<Set<string>>(new Set())
 
   const isElite = contractor.plan_type === 'elite'
-  const isOverCap = contractor.plan_type === 'pro' && contractor.leads_used_this_month >= PRO_MONTHLY_LEAD_CAP
+  const creditsUsed = (contractor as any).leads_used_this_month ?? (contractor as any).lead_credits_used_this_month ?? 0
+  const isOverCap = contractor.plan_type === 'pro' && creditsUsed >= PRO_MONTHLY_LEAD_CAP
 
   function handleClaimed(leadId: string) {
     setClaimedIds(new Set([...claimedIds, leadId]))
@@ -82,6 +83,10 @@ export default function AvailableLeadsTable({ leads, contractor }: Props) {
 
           const claimLabel = isOverCap ? 'Claim ($25)' :
             contractor.plan_type === 'pay_per_lead' ? 'Claim ($45)' : 'Claim Lead'
+
+          // Support both old and new column names
+          const leadName = (lead as any).homeowner_name ?? (lead as any).name ?? 'Lead'
+          const leadDesc = (lead as any).project_description ?? (lead as any).description ?? null
 
           return (
             <div
@@ -108,7 +113,7 @@ export default function AvailableLeadsTable({ leads, contractor }: Props) {
                 {/* Lead info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="font-bold text-white text-base">{lead.name.split(' ')[0]}  ·  {lead.zip}</span>
+                    <span className="font-bold text-white text-base">{leadName.split(' ')[0]}  ·  {lead.zip}</span>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full
                       ${isPriorityWindow
                         ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
@@ -121,8 +126,8 @@ export default function AvailableLeadsTable({ leads, contractor }: Props) {
                   <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
                     <span>🕐 {timeSince(lead.created_at)}</span>
                     {lead.callback_time && <span>📞 Prefers {lead.callback_time}</span>}
-                    {lead.description && (
-                      <span className="text-gray-400 truncate max-w-xs">"{lead.description}"</span>
+                    {leadDesc && (
+                      <span className="text-gray-400 truncate max-w-xs">"{leadDesc}"</span>
                     )}
                   </div>
                 </div>
