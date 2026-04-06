@@ -261,7 +261,7 @@ export default function LeadAlertSiren({
                 {NICHE_ICONS[newLead.niche] ?? '🏠'}
               </div>
               <div>
-                <p className="text-white font-black text-xl">{newLead.name.split(' ')[0]}</p>
+                <p className="text-white font-black text-xl">{(newLead.name ?? newLead.homeowner_name ?? 'Lead').split(' ')[0]}</p>
                 <p className="text-gray-400 text-sm">{newLead.niche} · ZIP {newLead.zip}</p>
                 {newLead.callback_time && (
                   <p className="text-gray-500 text-xs mt-0.5">Prefers: {newLead.callback_time}</p>
