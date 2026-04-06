@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       .in('zip', safeZipCodes)
       .order('created_at', { ascending: false })
 
-    if (contractor.plan_type !== 'elite') {
+    if (contractor.plan_type !== 'elite' && contractor.plan_type !== 'elite_plus') {
       query = query.lt('created_at', eliteWindowStart.toISOString())
     }
 
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
         contractorId={contractor.id}
         niche={safeNiche}
         zipCodes={safeZipCodes}
-        isElite={contractor.plan_type === 'elite'}
+        isElite={contractor.plan_type === 'elite' || contractor.plan_type === 'elite_plus'}
         initialLeadIds={leads.map(l => l.id)}
         alertSound={contractor.alert_sound ?? 'siren'}
       />
