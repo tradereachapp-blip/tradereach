@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Lead, Contractor } from '@/types'
 import { PRO_MONTHLY_LEAD_CAP } from '@/lib/config'
-import { PRICING } from '@/lib/pricing'
+import { PRICING, getOveragePrice } from '@/lib/pricing'
 
 interface Props {
   lead: Lead
@@ -20,15 +20,10 @@ export default function ClaimLeadModal({ lead, contractor, onClose, onClaimed }:
   const [error, setError] = useState('')
   const [paymentIntentSecret, setPaymentIntentSecret] = useState('')
 
-  const creditsUsed = (contractor as any).leads_used_this_month ?? (contractor as any).lead_credits_used_this_month ?? 0
-  const isOverCap = contractor.plan_type === 'pro' && creditsUsed >= PRO_MONTHLY_LEAD_CAP
+  const isOverCap = contractor.plan_type !== 'pay_per_lead' && contractor.plan_type !== 'none' && (contractor.lead_credits_remaining ?? 0) <= 0
   const isPPL = contractor.plan_type === 'pay_per_lead'
   const requiresPayment = isOverCap || isPPL
-  const amount = isOverCap ? PRICING.PRO_OVERAGE : isPPL ? PRICING.PPL_PRICE : 0
-
-  // Support both old and new column names for lead fields
-  const leadName = (lead as any).homeowner_name ?? (lead as any).name ?? 'Lead'
-  const firstName = leadName.split(' ')[0]
+  const amount = isPPL ? PRICING.PPL_PRICE : isOverCap ? getOveragePrice(contractor.plan_type) : 0
 
   async function handleInitialClaim() {
     setLoading(true)
@@ -121,7 +116,7 @@ export default function ClaimLeadModal({ lead, contractor, onClose, onClaimed }:
             <div>
               <div className="bg-gray-800/60 border border-white/8 rounded-xl p-4 mb-4 space-y-2.5">
                 {[
-                  ['First Name', firstName],
+                  ['First Name', lead.name.split(' ')[0]],
                   ['ZIP Code', lead.zip],
                   ['Service', lead.niche],
                   ['Best Time', lead.callback_time ?? 'Anytime'],
@@ -137,7 +132,7 @@ export default function ClaimLeadModal({ lead, contractor, onClose, onClaimed }:
                 <div className="bg-orange-500/8 border border-orange-500/20 rounded-xl p-4 mb-4">
                   <p className="text-sm text-orange-300">
                     {isOverCap
-                      ? `You've used all ${PRO_MONTHLY_LEAD_CAP} included leads this month. This lead is charged at $${PRICING.PRO_OVERAGE}.`
+                      ? `You've used all your included credits this month. This lead is charged at $${getOveragePrice(contractor.plan_type)}.`
                       : `You'll be charged $${PRICING.PPL_PRICE} for this lead.`}
                   </p>
                   <p className="text-2xl font-black text-orange-400 mt-1">${amount}</p>
@@ -194,7 +189,7 @@ export default function ClaimLeadModal({ lead, contractor, onClose, onClaimed }:
                 <button
                   onClick={handlePaymentConfirm}
                   disabled={loading}
-                  className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold disabled:opacity-50 text-sm hover:scale-[1.02] transition-all"
+                  className="flex-1 py-3 bg-orange-500 hover:bw-orange-600 text-white rounded-xl font-bold disabled:opacity-50 text-sm hover:scale-[1.02] transition-all"
                 >
                   {loading ? 'Processing...' : `Pay $${amount}`}
                 </button>
