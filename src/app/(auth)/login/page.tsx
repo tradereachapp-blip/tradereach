@@ -17,34 +17,38 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    const supabase = createClient()
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const supabase = createClient()
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (signInError) {
-      setError(signInError.message)
-      setLoading(false)
-      return
-    }
-
-    // Check if onboarding is complete
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data: contractor } = await supabase
-        .from('contractors')
-        .select('onboarding_complete')
-        .eq('user_id', user.id)
-        .single()
-
-      if (!contractor?.onboarding_complete) {
-        router.push('/onboarding')
-      } else {
-        router.push('/dashboard')
+      if (signInError) {
+        setError(signInError.message)
+        setLoading(false)
+        return
       }
+
+      // Check if onboarding is complete
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: contractor } = await supabase
+          .from('contractors')
+          .select('onboarding_complete')
+          .eq('user_id', user.id)
+          .single()
+
+        if (!contractor?.onboarding_complete) {
+          router.push('/onboarding')
+        } else {
+          router.push('/dashboard')
+        }
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.')
+      setLoading(false)
     }
-    router.refresh()
   }
 
   return (
@@ -73,7 +77,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="dark-input"
-            placeholder="••••••••"
+            placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"
           />
         </div>
 
