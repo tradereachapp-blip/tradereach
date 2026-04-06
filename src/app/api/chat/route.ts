@@ -1,4 +1,4 @@
-// ─── Chat API Route ──────────────────────────────────────────────────────────
+// âââ Chat API Route ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // Calls Anthropic Claude API, handles encryption, sensitive data detection,
 // escalation detection, and saves messages to Supabase.
 
@@ -33,21 +33,21 @@ UPGRADING OR DOWNGRADING: You can upgrade or downgrade your plan anytime through
 
 CANCELLATION: You can cancel anytime through the billing portal in Settings. There are no cancellation fees. You keep access until the end of your current billing period.
 
-LEAD QUALITY: We run Facebook ads targeting homeowners who are actively requesting quotes for home services. These are real homeowners who filled out a form and consented to be contacted. We recommend calling leads within 5 minutes of receiving the notification for the highest close rate. 🏠
+LEAD QUALITY: We run Facebook ads targeting homeowners who are actively requesting quotes for home services. These are real homeowners who filled out a form and consented to be contacted. We recommend calling leads within 5 minutes of receiving the notification for the highest close rate. ð 
 
-EXCLUSIVE TERRITORY: Elite subscribers own their zip codes exclusively. No other contractor in an Elite zip code receives leads for that zip. This means zero competition for leads in your area. ⚡
+EXCLUSIVE TERRITORY: Elite subscribers own their zip codes exclusively. No other contractor in an Elite zip code receives leads for that zip. This means zero competition for leads in your area. â¡
 
 PRIORITY WINDOW: Elite contractors get a 15 minute head start on every new lead before any other contractor is notified. After 15 minutes if unclaimed the lead goes to the next contractor in queue.
 
-ESCALATION RULES: If a contractor mentions wanting a refund, reports a technical bug, or expresses significant frustration — acknowledge their issue warmly and say you are flagging it for the support team. Ask for their email and phone number to follow up within 24 hours.
+ESCALATION RULES: If a contractor mentions wanting a refund, reports a technical bug, or expresses significant frustration â acknowledge their issue warmly and say you are flagging it for the support team. Ask for their email and phone number to follow up within 24 hours.
 
 LEAD CAPTURE RULES: If someone asks about the platform but does not appear to be a signed-up contractor, ask for their name, email, and phone number so the team can get them set up.
 
 CANCELLATION RETENTION: If a contractor mentions wanting to cancel, first ask what the issue is and try to offer a solution. If they are still intent on canceling, collect their contact info and say the team will reach out personally.
 
-Always be helpful, friendly, and concise. Use the contractor's first name when you know it. Use occasional relevant emojis — maximum one per response. Keep responses short and conversational. Use line breaks to make responses easy to read on mobile. Never make up information about the platform.`
+Always be helpful, friendly, and concise. Use the contractor's first name when you know it. Use occasional relevant emojis â maximum one per response. Keep responses short and conversational. Use line breaks to make responses easy to read on mobile. Never make up information about the platform.`
 
-// ── Support escalation trigger detection ─────────────────────────────────────
+// ââ Support escalation trigger detection âââââââââââââââââââââââââââââââââââââ
 // Returns an escalation type or null. Checked BEFORE calling the AI.
 function detectEscalationTrigger(text: string): 'support_request' | 'billing' | 'technical' | null {
   const t = text.toLowerCase()
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     const lastUserMessage = messages[messages.length - 1]?.content ?? ''
     const startTime = Date.now()
 
-    // ── Situation 1, 3, 4: Pre-AI trigger detection ───────────────────────
+    // ââ Situation 1, 3, 4: Pre-AI trigger detection âââââââââââââââââââââââ
     const preTrigger = detectEscalationTrigger(lastUserMessage)
     if (preTrigger) {
       // Return escalation signal immediately without calling AI
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
       const priority = inferPriorityFromText(lastUserMessage)
       return Response.json({
         content: null, // client will show escalation UI
-        sessionId: activeSessionId,
+        sessionId: sessionId ?? null,
         suggestions: [],
         needsEscalation: false,
         escalationTrigger: preTrigger,
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
       resend.emails.send({
         from: FROM_EMAIL,
         to: ADMIN_EMAIL,
-        subject: '⚠️ TradeReach Chat: Sensitive Data Detected',
+        subject: 'â ï¸ TradeReach Chat: Sensitive Data Detected',
         html: `<p>A chat message contained what appears to be sensitive data (credit card, SSN, or bank account). The content was not stored. Contractor ID: ${user?.id ?? 'unknown'}</p>`,
       }).catch(() => {})
     }
