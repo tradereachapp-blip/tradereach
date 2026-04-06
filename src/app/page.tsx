@@ -238,8 +238,8 @@ export default function HomePage() {
             <div className="space-y-4">
               {[
                 { name: 'Jennifer M.', location: 'Austin, TX', service: 'Roofing', quote: 'I filled out the form at 9am and had two contractors calling me by 10:30. Got my roof replaced for $800 less than what my neighbor paid.' },
-                { name: 'Mike D.', location: 'Phoenix, AZ', service: 'HVAC', quote: 'AC went out on a 105° day. TradeReach had a tech at my door same afternoon. Couldn\'t believe it.' },
-                { name: 'Sandra T.', location: 'Nashville, TN', service: 'Plumbing', quote: 'Finally a service that doesn\'t spam you. One call, one contractor, fixed same day.' },
+                { name: 'Mike D.', location: 'Phoenix, AZ', service: 'HVAC', quote: "AC went out on a 105° day. TradeReach had a tech at my door same afternoon. Couldn't believe it." },
+                { name: 'Sandra T.', location: 'Nashville, TN', service: 'Plumbing', quote: "Finally a service that doesn't spam you. One call, one contractor, fixed same day." },
               ].map((t, i) => (
                 <div key={t.name} className="premium-card reveal-up bg-white/3 border border-white/8 rounded-2xl p-5" style={{ animationDelay: `${i * 0.1}s` }}>
                   <div className="flex mb-3">
@@ -320,6 +320,36 @@ export default function HomePage() {
               <p>TradeReach collects your name, phone number, email address, ZIP code, and service request information solely for connecting you with qualified local contractors. We do not sell your personally identifiable information to data brokers. California residents have rights under CCPA — contact <a href="mailto:support@tradereachapp.com" className="text-gray-500 underline hover:text-gray-400">support@tradereachapp.com</a> to exercise them.</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── CONTRACTOR RECRUITMENT BANNER ── */}
+      <section style={{
+        background: 'linear-gradient(135deg, #080f1e 0%, #0d1a30 50%, #080f1e 100%)',
+        borderTop: '1px solid rgba(249,115,22,0.15)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Subtle orange radial glow — right side */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(ellipse at 85% 50%, rgba(249,115,22,0.07) 0%, transparent 65%)',
+          pointerEvents: 'none',
+        }} aria-hidden="true" />
+        <div className="max-w-5xl mx-auto px-6 py-14 relative flex flex-col sm:flex-row items-center justify-between gap-8">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-black text-white mb-3">Are You a Contractor?</h2>
+            <p className="text-gray-400 max-w-lg leading-relaxed text-sm md:text-base">
+              Join TradeReach and start receiving warm homeowner leads in your area. No cold calling. No chasing. Just inbound quotes.
+            </p>
+          </div>
+          <a
+            href="/contractors"
+            className="cta-btn flex-shrink-0 inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-black px-8 py-4 rounded-xl transition-all shadow-lg shadow-orange-500/30 text-sm whitespace-nowrap"
+          >
+            Start Receiving Leads →
+          </a>
         </div>
       </section>
 
