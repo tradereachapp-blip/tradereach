@@ -12,45 +12,54 @@ export default async function AdminDashboard() {
   const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
-  const [
-    { count: leadsToday },
-    { count: leadsWeek },
-    { count: leadsMonth },
-    { count: totalContractors },
-    { data: subscribers },
-    { data: pplClaims },
-    { data: zipCapacities },
-    { data: allContractors },
-  ] = await Promise.all([
-    admin.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', todayStart),
-    admin.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', weekStart),
-    admin.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
-    admin.from('contractors').select('*', { count: 'exact', head: true }),
-    admin.from('contractors').select('plan_type, subscription_status').in('subscription_status', ['active', 'trialing']),
-    admin.from('lead_claims').select('amount_charged').eq('payment_type', 'pay_per_lead').gte('claimed_at', monthStart),
-    admin.from('zip_capacity').select('*'),
-    admin.from('contractors').select('plan_type, founding_member'),
-  ])
+  // Safe defaults in case any table/column doesn't exist yet in production
+  let leadsToday = 0, leadsWeek = 0, leadsMonth = 0, totalContractors = 0
+  let subscribers: any[] = []
+  let pplClaims: any[] = []
+  let zipCapacities: any[] = []
+  let allContractors: any[] = []
 
-  const proCount = subscribers?.filter(s => s.plan_type === 'pro').length ?? 0
-  const eliteCount = subscribers?.filter(s => s.plan_type === 'elite').length ?? 0
-  const pplRevenue = (pplClaims ?? []).reduce((sum, c) => sum + (c.amount_charged ?? 0), 0)
+  try {
+    const results = await Promise.allSettled([
+      admin.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', todayStart),
+      admin.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', weekStart),
+      admin.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
+      admin.from('contractors').select('*', { count: 'exact', head: true }),
+      admin.from('contractors').select('plan_type, subscription_status').in('subscription_status', ['active', 'trialing']),
+      admin.from('lead_claims').select('amount_charged').eq('payment_type', 'pay_per_lead').gte('claimed_at', monthStart),
+      admin.from('zip_capacity').select('*').limit(500),
+      admin.from('contractors').select('plan_type, founding_member').limit(500),
+    ])
+
+    if (results[0].status === 'fulfilled') leadsToday = results[0].value.count ?? 0
+    if (results[1].status === 'fulfilled') leadsWeek = results[1].value.count ?? 0
+    if (results[2].status === 'fulfilled') leadsMonth = results[2].value.count ?? 0
+    if (results[3].status === 'fulfilled') totalContractors = results[3].value.count ?? 0
+    if (results[4].status === 'fulfilled') subscribers = results[4].value.data ?? []
+    if (results[5].status === 'fulfilled') pplClaims = results[5].value.data ?? []
+    if (results[6].status === 'fulfilled') zipCapacities = results[6].value.data ?? []
+    if (results[7].status === 'fulfilled') allContractors = results[7].value.data ?? []
+  } catch (e) {
+    console.error('Admin dashboard query error:', e)
+  }
+
+  const proCount = subscribers.filter(s => s.plan_type === 'pro').length
+  const eliteCount = subscribers.filter(s => s.plan_type === 'elite').length
+  const pplRevenue = pplClaims.reduce((sum, c) => sum + (c.amount_charged ?? 0), 0)
   const mrr = proCount * PRICING.PRO_MONTHLY + eliteCount * PRICING.ELITE_MONTHLY
 
   // New stats
-  const oversaturatedZips = (zipCapacities ?? []).filter((z: any) => z.is_oversaturated).length
-  const foundingProCount = (allContractors ?? []).filter((c: any) => c.plan_type === 'pro' && c.founding_member).length
-  const foundingEliteCount = (allContractors ?? []).filter((c: any) => c.plan_type === 'elite' && c.founding_member).length
-  const elitePlusCount = subscribers?.filter(s => s.plan_type === 'elite_plus').length ?? 0
-
-  // Credit transactions (using lead_claims that charged credits)
-  const creditTransactions = pplClaims?.length ?? 0
+  const oversaturatedZips = zipCapacities.filter((z: any) => z.is_oversaturated).length
+  const foundingProCount = allContractors.filter((c: any) => c.plan_type === 'pro' && c.founding_member).length
+  const foundingEliteCount = allContractors.filter((c: any) => c.plan_type === 'elite' && c.founding_member).length
+  const elitePlusCount = subscribers.filter(s => s.plan_type === 'elite_plus').length
+  const creditTransactions = pplClaims.length
 
   const stats = [
-    { label: 'Leads Today', value: leadsToday ?? 0, color: 'text-blue-400' },
-    { label: 'Leads This Week', value: leadsWeek ?? 0, color: 'text-blue-400' },
-    { label: 'Leads This Month', value: leadsMonth ?? 0, color: 'text-blue-400' },
-    { label: 'Total Contractors', value: totalContractors ?? 0, color: 'text-green-400' },
+    { label: 'Leads Today', value: leadsToday, color: 'text-blue-400' },
+    { label: 'Leads This Week', value: leadsWeek, color: 'text-blue-400' },
+    { label: 'Leads This Month', value: leadsMonth, color: 'text-blue-400' },
+    { label: 'Total Contractors', value: totalContractors, color: 'text-green-400' },
     { label: 'Pro Subscribers', value: proCount, color: 'text-blue-400' },
     { label: 'Elite Subscribers', value: eliteCount, color: 'text-purple-400' },
     { label: 'Elite Plus Subscribers', value: elitePlusCount, color: 'text-yellow-400' },
@@ -87,7 +96,7 @@ export default async function AdminDashboard() {
                 {oversaturatedZips} ZIPs Oversaturated
               </h3>
               <p className="text-gray-400 text-sm">
-                {zipCapacities?.length ?? 0} total ZIPs monitored
+                {zipCapacities.length} total ZIPs monitored
               </p>
             </div>
             <div className="text-3xl">🗺️</div>
@@ -130,7 +139,7 @@ export default async function AdminDashboard() {
         </a>
       </div>
 
-      {/* System Status Dashboard – Client Component with Rex + live status */}
+      {/* System Status Dashboard — Client Component with Rex + live status */}
       <SystemStatusPanel />
     </div>
   )
