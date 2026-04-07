@@ -30,23 +30,28 @@ export default function LoginPage() {
         return
       }
 
-      // Check if onboarding is complete
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: contractor } = await supabase
-          .from('contractors')
-          .select('onboarding_complete')
-          .eq('user_id', user.id)
-          .single()
-
-        if (!contractor?.onboarding_complete) {
-          router.push('/onboarding')
-        } else {
-          router.push('/dashboard')
-        }
+      if (!user) {
+        setError('Authentication failed. Please try again.')
+        setLoading(false)
+        return
       }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.')
+
+      const { data: contractor } = await supabase
+        .from('contractors')
+        .select('onboarding_complete')
+        .eq('user_id', user.id)
+        .single()
+
+      router.refresh()
+
+      if (!contractor?.onboarding_complete) {
+        router.push('/onboarding')
+      } else {
+        router.push('/dashboard')
+      }
+    } catch {
+      setError('Something went wrong. Please try again.')
       setLoading(false)
     }
   }
@@ -77,7 +82,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="dark-input"
-            placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"
+            placeholder="••••••••"
           />
         </div>
 
