@@ -27,7 +27,7 @@ function formatPhone(raw: string): string {
 
 export default function LeadCaptureForm() {
   const [form, setForm] = useState({
-    name: '', phone: '', zip: '', niche: '', description: '', callback_time: '', tcpa_consent: false,
+    name: '', phone: '', email: '', zip: '', niche: '', description: '', callback_time: '', tcpa_consent: false,
   })
   const [loadTime] = useState(() => Date.now())
   const [step, setStep] = useState(1)
@@ -74,7 +74,9 @@ export default function LeadCaptureForm() {
     const digits = form.phone.replace(/\D/g, '')
     if (!digits) e.phone = 'Phone number is required'
     else if (digits.length < 10) e.phone = 'Enter a valid 10-digit number'
-    if (!form.tcpa_consent) e.tcpa_consent = 'You must agree to be contacted'
+    if (!form.email.trim()) e.email = 'Email address is required'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Enter a valid email address'
+    if (!form.tcpa_consent) e.tcpa_consent = 'You must check this box to continue'
     return e
   }
 
@@ -248,7 +250,7 @@ export default function LeadCaptureForm() {
               <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Service Needed <span className="text-orange-500">*</span>
               </label>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                 {NICHES.map(n => (
                   <button
                     key={n.value}
@@ -328,6 +330,7 @@ export default function LeadCaptureForm() {
               type="button"
               onClick={handleNext}
               className="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-4 rounded-xl transition-all duration-200 text-lg shadow-lg shadow-orange-500/30 active:scale-[0.99] flex items-center justify-center gap-2"
+              style={{ minHeight: '56px' }}
             >
               Continue
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -391,7 +394,7 @@ export default function LeadCaptureForm() {
             </div>
 
             {/* Phone */}
-            <div className="mb-4">
+            <div className="mb-3">
               <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Phone Number <span className="text-orange-500">*</span>
               </label>
@@ -405,24 +408,49 @@ export default function LeadCaptureForm() {
               {errors.phone && <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1"><span>⚠</span>{errors.phone}</p>}
             </div>
 
+            {/* Email */}
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                Email Address <span className="text-orange-500">*</span>
+              </label>
+              <input
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                value={form.email}
+                onChange={e => update('email', e.target.value)}
+                placeholder="you@example.com"
+                className={`dark-input ${errors.email ? '!border-red-400/70' : ''}`}
+              />
+              {errors.email && <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1"><span>⚠</span>{errors.email}</p>}
+            </div>
+
             {/* TCPA */}
             <div className={`rounded-xl border p-3 mb-4 transition-colors duration-200 ${
               errors.tcpa_consent ? 'border-red-400/50 bg-red-500/5' : 'border-white/8 bg-white/4'
             }`}>
               <label className="flex gap-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.tcpa_consent}
-                  onChange={e => update('tcpa_consent', e.target.checked)}
-                  className="mt-0.5 w-3.5 h-3.5 rounded flex-shrink-0 accent-orange-500"
-                />
-                <span style={{ fontSize: '10.5px', color: 'rgba(107,114,128,0.9)', lineHeight: '1.55' }}>
-                  By checking this box, I provide my <strong style={{ color: 'rgba(156,163,175,0.85)' }}>prior express written consent</strong> to be contacted by TradeReach and its network of licensed contractors via automated calls, prerecorded messages, and/or SMS at the number provided, even if on a Do Not Call registry. Consent is not a condition of purchase. I also agree to TradeReach&apos;s{' '}
-                  <a href="/terms/homeowner" target="_blank" style={{ color: 'rgba(249,115,22,0.75)' }} className="underline hover:text-orange-400">Terms</a>{' '}
-                  and{' '}
-                  <a href="/privacy" target="_blank" style={{ color: 'rgba(249,115,22,0.75)' }} className="underline hover:text-orange-400">Privacy Policy</a>.
-                  Reply STOP to opt out.
-                </span>
+                <div className="flex-shrink-0 mt-0.5">
+                  <input
+                    type="checkbox"
+                    checked={form.tcpa_consent}
+                    onChange={e => update('tcpa_consent', e.target.checked)}
+                    className="w-4 h-4 rounded accent-orange-500 cursor-pointer"
+                    style={{ minWidth: '16px', minHeight: '16px' }}
+                  />
+                </div>
+                <div>
+                  <span style={{ fontSize: '12px', color: 'rgba(107,114,128,0.9)', lineHeight: '1.6' }}>
+                    <span className="text-red-400 mr-0.5">*</span>
+                    By checking this box and submitting this form, I provide my prior express written consent to be contacted by TradeReach and its network of licensed contractors regarding my home service request. I understand that my consent authorizes contractors to contact me via live telephone calls, automated telephone dialing systems, prerecorded messages, and/or text messages (SMS/MMS) at the phone number I provided, even if my number is listed on a Do Not Call registry. I understand that consent is not a condition of receiving any services, and that I may revoke my consent at any time. Message and data rates may apply.
+                  </span>
+                  <p style={{ fontSize: '10px', color: 'rgba(107,114,128,0.6)', marginTop: '6px' }}>
+                    By submitting you also agree to our{' '}
+                    <a href="/privacy" target="_blank" style={{ color: 'rgba(107,114,128,0.8)' }} className="underline">Privacy Policy</a>
+                    {' '}and{' '}
+                    <a href="/terms/homeowner" target="_blank" style={{ color: 'rgba(107,114,128,0.8)' }} className="underline">Terms of Service</a>.
+                  </p>
+                </div>
               </label>
               {errors.tcpa_consent && (
                 <p className="text-red-400 text-xs mt-2 ml-6 flex items-center gap-1"><span>⚠</span>{errors.tcpa_consent}</p>
@@ -438,7 +466,17 @@ export default function LeadCaptureForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl transition-all duration-200 text-lg shadow-lg shadow-orange-500/25 active:scale-[0.99] flex items-center justify-center gap-2"
+              onClick={() => {
+                if (!form.tcpa_consent) {
+                  setErrors(e => ({ ...e, tcpa_consent: 'You must check this box to continue' }))
+                }
+              }}
+              className={`w-full text-white font-black py-4 rounded-xl transition-all duration-200 text-lg shadow-lg active:scale-[0.99] flex items-center justify-center gap-2 ${
+                form.tcpa_consent
+                  ? 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/25'
+                  : 'bg-orange-500/70 shadow-orange-500/10 cursor-pointer'
+              } disabled:cursor-not-allowed`}
+              style={{ minHeight: '56px' }}
             >
               {loading ? (
                 <>
@@ -450,10 +488,7 @@ export default function LeadCaptureForm() {
                 </>
               ) : (
                 <>
-                  Get My Free Quote
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
+                  Get My Free Quote →
                 </>
               )}
             </button>

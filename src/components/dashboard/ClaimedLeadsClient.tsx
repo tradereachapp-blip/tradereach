@@ -292,7 +292,7 @@ export default function ClaimedLeadsClient({ initialClaims }: { initialClaims: C
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <h3 className="font-bold text-white text-lg leading-tight">
-                      {lead.name.split(' ')[0]}
+                      {(lead.name ?? '').split(' ')[0]}
                     </h3>
                     <p className="text-gray-500 text-sm mt-0.5">{lead.niche}</p>
                   </div>
@@ -465,7 +465,7 @@ export default function ClaimedLeadsClient({ initialClaims }: { initialClaims: C
               <div className="flex items-start justify-between mb-5">
                 <div>
                   <h3 className="text-lg font-bold text-white">Request a Credit</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Lead: {claim.leads.name.split(' ')[0]} · {claim.leads.niche}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Lead: {(claim.leads.name ?? '').split(' ')[0]} · {claim.leads.niche}</p>
                 </div>
                 <button onClick={() => setCreditModal(null)} className="text-gray-600 hover:text-white transition-colors text-xl leading-none">×</button>
               </div>
